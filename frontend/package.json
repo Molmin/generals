@@ -1,0 +1,21 @@
+{
+  "name": "generals-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "build": "esbuild index.ts --bundle --outfile=dist/ui.js --minify"
+  },
+  "author": "Milmon <milmon@qq.com>",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "esbuild": "^0.20.1",
+    "jquery": "^3.7.1",
+    "socket.io-client": "^4.7.4",
+    "superagent": "^8.1.2"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.29",
+    "@types/superagent": "^8.1.4"
+  }
+}
