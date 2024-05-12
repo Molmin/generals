@@ -80,16 +80,16 @@ export class GeneralsGame {
     }
 
     getInformation(player: number, isHalf = false): GameInformation {
-        const canView: string[] = []
+        const canView = new Set<string>()
         for (let i = 0; i < this.now.length; i++)
             for (let j = 0; j < this.now[0].length; j++)
                 if (this.now[i][j].owner === player) {
                     for (let u = -1; u <= 1; u++)
                         for (let v = -1; v <= 1; v++)
-                            canView.push([i + u, j + v].toString())
+                            canView.add([i + u, j + v].toString())
                 }
         const data = this.now.map((line, x) => line.map((cell, y) => {
-            if (canView.includes([x, y].toString())) return cell
+            if (canView.has([x, y].toString())) return cell
             else return {
                 type: ['city', 'mountain'].includes(cell.type) ? 'obstacle' : 'unknown',
                 owner: 0,

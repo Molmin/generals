@@ -1,4 +1,5 @@
 import superagent from 'superagent'
+import { } from './jquery'
 
 let name = ''
 let uid = 0
