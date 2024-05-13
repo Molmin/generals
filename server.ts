@@ -10,7 +10,8 @@ import crypto from 'node:crypto'
 import Token from './model/token'
 import { startSave } from './model/database'
 import Game from './model/game'
-import { addGame, getCurrentInformation } from './service/game'
+import { addGame, getCurrentInformation, updateSteps } from './service/game'
+import { Step } from './lib/game'
 
 declare module 'superagent' {
     interface Request {
@@ -163,6 +164,16 @@ io.on('connection', (socket) => {
         socket.emit('pong')
     })
 
+    socket.on('updateSteps', (steps: Array<Step>) => {
+        if (!socketIdToUser[socket.id] || !socketIdToRoom[socket.id]) return
+        const user = Token.getByUser(socketIdToUser[socket.id])
+        const gameId = socketIdToRoom[socket.id]
+        const game = Game.get(gameId)
+        if (!game || !user) return socket.emit('error', '游戏不存在。')
+        if (game.done) return socket.emit('error', '游戏已经结束。')
+        updateSteps(gameId, user.uid, steps)
+    })
+
     socket.on('join', (id: number) => {
         if (!socketIdToUser[socket.id]) return
         const user = Token.getByUser(socketIdToUser[socket.id])
@@ -186,6 +197,7 @@ export interface GameInformation {
     map: string
     turn: number
     isHalf: boolean
+    doneSteps: Array<number>
 }
 
 export function sendMessage(id: number, func: (uid: number) => GameInformation) {

@@ -18,6 +18,7 @@ export async function init() {
   console.info('game.info', info)
   const game = new GeneralsGame()
   const socket = SocketIO(`${window.location.protocol.replace('http', 'ws')}//${window.location.host}`)
+  game.socket = socket
   let interval: NodeJS.Timeout
 
   socket.emit('token', UserService.token)
@@ -38,8 +39,10 @@ export async function init() {
     map: string
     turn: number
     isHalf: number
+    doneSteps: Array<number>
   }) => {
     console.info('socket: emit.update:', JSON.stringify(data).length)
+    game.markStepsAsDone(data.doneSteps)
     game.updatePlayers(data.players)
     game.updateMap(data.map)
     $('.page--game_play > .turn-counter').text(

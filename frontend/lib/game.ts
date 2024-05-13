@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io-client'
 import { } from './jquery'
 import { UserService } from './user'
 
@@ -18,6 +19,8 @@ export enum SELECT_STATUS {
   NOT_SELECTED = 3,
 }
 
+export type Step = [[number, number], [number, number], boolean, number]
+
 let initializedTable = false
 
 export class GeneralsGame {
@@ -26,6 +29,9 @@ export class GeneralsGame {
   width = 0
   height = 0
   me = 0
+  steps: Array<Step> = []
+  maxStepId: number = 0
+  socket: Socket
 
   nowSelectX = -1
   nowSelectY = -1
@@ -82,7 +88,7 @@ export class GeneralsGame {
   }
 
   updateSelectStatus(x: number, y: number, flag = false) {
-    if (x < 0 || y < 0) return
+    if (x < 0 || y < 0 || x >= this.height || y >= this.width) return
     if (flag) {
       this.updateSelectStatus(x + 1, y)
       this.updateSelectStatus(x - 1, y)
@@ -109,7 +115,14 @@ export class GeneralsGame {
     }
   }
 
-  handleAddStep(fromX: number, fromY: number, toX: number, toY: number, half: boolean) { }
+  handleAddStep(fromX: number, fromY: number, toX: number, toY: number, half: boolean) {
+    this.steps.push([[fromX, fromY], [toX, toY], half, ++this.maxStepId])
+    this.socket.emit('updateSteps', this.steps)
+  }
+  markStepsAsDone(done: Array<number>) {
+    // TODO recovery marked stepIds
+    this.steps = this.steps.filter((step) => !done.includes(step[3]))
+  }
 
   handleSelect(ev: JQuery.ClickEvent) {
     const target = $(ev.target)

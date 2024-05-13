@@ -7,6 +7,8 @@ export interface Cell {
     army: number
 }
 
+export type Step = [[number, number], [number, number], boolean, number]
+
 export interface GeneralsPlayback {
     playerToId: Record<number, number>
     idToPlayer: Record<number, number>
@@ -26,6 +28,8 @@ export class GeneralsGame {
         turns: [],
     }
     service: Array<NodeJS.Timeout> = []
+    steps: Record<number, Array<Step>> = {}
+    doneSteps: Record<number, Array<[number, number]>> = {}
     turn = 1
 
     constructor(
@@ -37,6 +41,8 @@ export class GeneralsGame {
             this.playerToId[players[id]] = id + 1
             this.idToPlayer[id + 1] = players[id]
             this.died[id + 1] = false
+            this.steps[id + 1] = []
+            this.doneSteps[id + 1] = []
         }
         this.record.playerToId = this.playerToId
         this.record.idToPlayer = this.idToPlayer
@@ -106,6 +112,7 @@ export class GeneralsGame {
             map: data.map((line) => line.map((cell) => `${cell.type[0]}${cell.owner}${cell.army}`).join(',')).join(';'),
             turn: this.turn,
             isHalf,
+            doneSteps: this.doneSteps[player].map((step) => step[0]),
         }
     }
 
@@ -129,6 +136,40 @@ export class GeneralsGame {
                     }
                 }
             }
+        const players = Object.keys(this.idToPlayer).map((player) => ({ player, priority: Math.random() }))
+            .sort((x, y) => x.priority - y.priority).map((doc) => +doc.player)
+        for (const player of players) {
+            this.doneSteps[player] = this.doneSteps[player].filter((step) => Date.now() - step[1] < 1000 * 10)
+            const steps = this.steps[player].filter((step) => this.doneSteps[player].filter((doc) => doc[0] === step[3]).length === 0)
+            let i = 0
+            while (true) {
+                const doStep = steps[i++]
+                if (!doStep) break
+                this.doneSteps[player].push([doStep[3], Date.now()])
+                const [[fromX, fromY], [toX, toY], isHalf] = doStep
+                const isInteger = (x: number) => Math.floor(x) === x && x >= 0
+                if (![fromX, fromY, toX, toY].every(isInteger)) continue
+                if (![fromX, toX].every((x) => x < this.now.length) || ![fromY, toY].every((x) => x < this.now[0].length)) continue
+                const cell = this.now[fromX][fromY]
+                const targetCell = this.now[toX][toY]
+                if (cell.owner !== player || cell.army <= 1 || targetCell.type === 'mountain') continue
+                const movableArmy = isHalf ? Math.floor(cell.army / 2) : cell.army - 1
+                if (targetCell.owner === player) {
+                    this.now[toX][toY].army += movableArmy
+                    this.now[fromX][fromY].army -= movableArmy
+                }
+                else if (targetCell.army < movableArmy) {
+                    this.now[toX][toY].army = movableArmy - targetCell.army
+                    this.now[toX][toY].owner = player
+                    this.now[fromX][fromY].army -= movableArmy
+                }
+                else {
+                    this.now[toX][toY].army -= movableArmy
+                    this.now[fromX][fromY].army -= movableArmy
+                }
+                break
+            }
+        }
         this.sendMap(false)
     }
 
