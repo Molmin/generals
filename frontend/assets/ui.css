@@ -173,3 +173,15 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
     background-image: url(/public/obstacle.png);
 }
+
+.game-table .center-vertical {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.game-table .center-horizontal {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}

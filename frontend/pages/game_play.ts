@@ -41,7 +41,6 @@ export async function init() {
     isHalf: number
     doneSteps: Array<number>
   }) => {
-    console.info('socket: emit.update:', JSON.stringify(data).length)
     game.markStepsAsDone(data.doneSteps)
     game.updatePlayers(data.players)
     game.updateMap(data.map)

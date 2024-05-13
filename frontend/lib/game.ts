@@ -8,11 +8,6 @@ export interface Cell {
   army: number
 }
 
-export function getArmyDisplay(army: Cell | number) {
-  if (typeof army !== 'number') army = army.army
-  return army > 0 ? army.toString() : ''
-}
-
 export enum SELECT_STATUS {
   SELECTED = 1,
   SELECTED_HALF = 2,
@@ -50,7 +45,6 @@ export class GeneralsGame {
   }
 
   updateMap(str: string) {
-    console.info(this.nowSelectX, this.nowSelectY, this.nowSelectStatus)
     const map = str.split(';').map((line) => line.split(','))
     if (!initializedTable) {
       this.width = map[0].length
@@ -63,7 +57,8 @@ export class GeneralsGame {
           this.$table.find(`tr[data-x="${i}"]`).append(`<td data-x="${i}" data-y="${j}"></td>`)
         }
       }
-      $(document).on('click', '.page--game_play table', (ev) => this.handleSelect(ev))
+      $(document).on('click', '.page--game_play table', (ev) => this.handleClickByEvent(ev))
+      $(document).on('keydown', (ev) => this.handleKeydown(ev))
       initializedTable = true
     }
     for (let x = 0; x < this.height; x++)
@@ -98,8 +93,18 @@ export class GeneralsGame {
     const td = this.$table.find(`td[data-x="${x}"][data-y="${y}"]`)
     const cell = this.now[x][y]
     const displayHalf = this.nowSelectX === x && this.nowSelectY === y && this.nowSelectStatus === SELECT_STATUS.SELECTED_HALF
-    if (!displayHalf) td.text(getArmyDisplay(cell))
-    if (displayHalf && td.text() !== '50%') td.text('50%')
+    const displayText = displayHalf ? '50%' : (cell.army > 0 || (cell.owner === 0 && cell.army === 0 && cell.type === 'city') ? cell.army.toString() : '')
+    function buildArrow(steps: Array<Step>, dx: number, dy: number, ele: string) {
+      const docs = steps.filter((doc) => doc[0][0] === x && doc[0][1] === y && doc[1][0] === x + dx && doc[1][1] === y + dy)
+      return docs.length > 0 ? ele : ''
+    }
+    td.html([
+      buildArrow(this.steps, 0, -1, '<div class="center-vertical" style="left: 0px;">←</div>'),
+      buildArrow(this.steps, 0, 1, '<div class="center-vertical" style="right: 0px;">→</div>'),
+      buildArrow(this.steps, -1, 0, '<div class="center-horizontal" style="top: 0px;">↑</div>'),
+      buildArrow(this.steps, 1, 0, '<div class="center-horizontal" style="bottom: 0px;">↓</div>'),
+      displayText,
+    ].join(''))
     const ensureNoClass = (css: string) => { if (td.hasClass(css)) td.removeClass(css) }
     const ensureHasClass = (css: string) => { if (!td.hasClass(css)) td.addClass(css) }
     const ensureClass = (css: string, has: boolean) => { has ? ensureHasClass(css) : ensureNoClass(css) }
@@ -108,7 +113,8 @@ export class GeneralsGame {
       ensureNoClass('attackable'), ensureHasClass('selectable')
     }
     else {
-      const attackable = Math.abs(this.nowSelectX - x) + Math.abs(this.nowSelectY - y) === 1
+      let attackable = Math.abs(this.nowSelectX - x) + Math.abs(this.nowSelectY - y) === 1
+      attackable &&= cell.type !== 'mountain'
       ensureNoClass('selected')
       ensureClass('attackable', attackable)
       ensureClass('selectable', attackable || cell.owner === this.me)
@@ -117,6 +123,10 @@ export class GeneralsGame {
 
   handleAddStep(fromX: number, fromY: number, toX: number, toY: number, half: boolean) {
     this.steps.push([[fromX, fromY], [toX, toY], half, ++this.maxStepId])
+    this.updateSelectStatus(fromX, fromY)
+    this.sendSteps()
+  }
+  sendSteps() {
     this.socket.emit('updateSteps', this.steps)
   }
   markStepsAsDone(done: Array<number>) {
@@ -124,12 +134,11 @@ export class GeneralsGame {
     this.steps = this.steps.filter((step) => !done.includes(step[3]))
   }
 
-  handleSelect(ev: JQuery.ClickEvent) {
-    const target = $(ev.target)
+  handleClick(target: JQuery<any>, shortcut = true) {
     const x = this.nowSelectX, y = this.nowSelectY
     const newX = +(target.attr('data-x') || '0'), newY = +(target.attr('data-y') || '0')
     function clearSelect() {
-      console.info('clearSelect:', this.nowSelectX, this.nowSelectY)
+      if (shortcut) return
       this.nowSelectStatus = SELECT_STATUS.NOT_SELECTED
       this.nowSelectX = this.nowSelectY = -1
       this.updateSelectStatus(x, y, true)
@@ -143,8 +152,9 @@ export class GeneralsGame {
       this.updateSelectStatus(newX, newY, true)
     }
     else if (x === newX && y === newY) {
-      if (this.nowSelectStatus === SELECT_STATUS.SELECTED_HALF) return clearSelect.bind(this)()
-      this.nowSelectStatus = SELECT_STATUS.SELECTED_HALF
+      const alreadyHalf = this.nowSelectStatus === SELECT_STATUS.SELECTED_HALF
+      if (alreadyHalf && !shortcut) return clearSelect.bind(this)()
+      this.nowSelectStatus = alreadyHalf ? SELECT_STATUS.SELECTED : SELECT_STATUS.SELECTED_HALF
       this.updateSelectStatus(x, y)
     }
     else if (target.hasClass('selectable')) {
@@ -154,5 +164,29 @@ export class GeneralsGame {
       this.updateSelectStatus(newX, newY, true)
     }
     else return clearSelect.bind(this)()
+  }
+  handleClickByEvent(ev: JQuery.ClickEvent) {
+    this.handleClick($(ev.target), false)
+  }
+
+  handleKeydown(ev: JQuery.KeyDownEvent) {
+    if (this.nowSelectStatus === SELECT_STATUS.NOT_SELECTED) return
+    if (['ArrowUp', 'KeyW'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX - 1}"][data-y="${this.nowSelectY}"]`))
+    if (['ArrowDown', 'KeyS'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX + 1}"][data-y="${this.nowSelectY}"]`))
+    if (['ArrowLeft', 'KeyA'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX}"][data-y="${this.nowSelectY - 1}"]`))
+    if (['ArrowRight', 'KeyD'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX}"][data-y="${this.nowSelectY + 1}"]`))
+    if (ev.code === 'KeyZ') return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX}"][data-y="${this.nowSelectY}"]`))
+    if (ev.code === 'KeyQ') {
+      const steps = this.steps
+      this.steps = []
+      for (const step of steps) this.updateSelectStatus(step[0][0], step[0][1])
+      return this.sendSteps()
+    }
+    if (ev.code === 'KeyE') {
+      const step = this.steps.pop()
+      if (!step) return
+      this.updateSelectStatus(step[0][0], step[0][1])
+      return this.sendSteps()
+    }
   }
 }

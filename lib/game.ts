@@ -123,19 +123,7 @@ export class GeneralsGame {
         })
     }
 
-    handleTurn() {
-        this.turn++
-        for (let i = 0; i < this.now.length; i++)
-            for (let j = 0; j < this.now[0].length; j++) {
-                if (this.now[i][j].owner) {
-                    if (['city', 'general'].includes(this.now[i][j].type)) {
-                        this.now[i][j].army++
-                    }
-                    else if (this.now[i][j].type === 'empty') {
-                        if (this.turn % 25 === 0) this.now[i][j].army++
-                    }
-                }
-            }
+    handleMove() {
         const players = Object.keys(this.idToPlayer).map((player) => ({ player, priority: Math.random() }))
             .sort((x, y) => x.priority - y.priority).map((doc) => +doc.player)
         for (const player of players) {
@@ -160,7 +148,14 @@ export class GeneralsGame {
                 }
                 else if (targetCell.army < movableArmy) {
                     this.now[toX][toY].army = movableArmy - targetCell.army
-                    this.now[toX][toY].owner = player
+                    if (targetCell.type === 'general') {
+                        const killed = this.now[toX][toY].owner
+                        this.now[toX][toY].type = 'city'
+                        for (let i = 0; i < this.now.length; i++)
+                            for (let j = 0; j < this.now[0].length; j++)
+                                if (this.now[i][j].owner === killed) this.now[i][j].owner = player
+                    }
+                    else this.now[toX][toY].owner = player
                     this.now[fromX][fromY].army -= movableArmy
                 }
                 else {
@@ -170,10 +165,27 @@ export class GeneralsGame {
                 break
             }
         }
+    }
+
+    handleTurn() {
+        this.turn++
+        for (let i = 0; i < this.now.length; i++)
+            for (let j = 0; j < this.now[0].length; j++) {
+                if (this.now[i][j].owner) {
+                    if (['city', 'general'].includes(this.now[i][j].type)) {
+                        this.now[i][j].army++
+                    }
+                    else if (this.now[i][j].type === 'empty') {
+                        if (this.turn % 25 === 0) this.now[i][j].army++
+                    }
+                }
+            }
+        this.handleMove()
         this.sendMap(false)
     }
 
     handleHalfTurn() {
+        this.handleMove()
         this.sendMap(true)
     }
 }
