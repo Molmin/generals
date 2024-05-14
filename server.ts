@@ -58,7 +58,9 @@ const indexFile = readFileSync('frontend/assets/index.html').toString()
 const favicon = readFileSync('frontend/assets/favicon.png')
 
 app.get(`/ui-${scriptVersion}.js`, (req, res) => res.send(scriptFile))
+app.get(`/ui.js`, (req, res) => res.send(readFileSync('frontend/dist/ui.js').toString()))
 app.get(`/ui-${styleVersion}.css`, (req, res) => res.type('text/css').send(styleFile))
+app.get(`/ui.css`, (req, res) => res.type('text/css').send(readFileSync('frontend/assets/ui.css').toString()))
 app.get(`/jquery.min.js`, (req, res) => res.send(jqueryFile))
 app.get('/favicon.png', (req, res) => res.send(favicon))
 

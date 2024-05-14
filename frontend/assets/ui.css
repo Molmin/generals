@@ -80,8 +80,7 @@ body {
 }
 
 .game-table td {
-    display: table-cell;
-    vertical-align: inherit;
+    position: relative;
     width: var(--cell-size);
     height: var(--cell-size);
     min-width: var(--cell-size);
@@ -129,7 +128,6 @@ body {
 }
 
 .game-table td.selectable {
-    position: relative;
     z-index: 20;
 }
 

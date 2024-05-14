@@ -49,11 +49,11 @@ export class GeneralsGame {
     }
 
     async startService() {
-        await new Promise((resolve) => setTimeout(resolve, this.startAt - 500 - Date.now()))
-        this.service.push(setInterval(() => this.handleHalfTurn(), 1000))
         await new Promise((resolve) => setTimeout(resolve, this.startAt - Date.now()))
-        this.service.push(setInterval(() => this.handleTurn(), 1000))
-        this.sendMap(false)
+        this.service.push(setInterval(() => this.handle(), 500))
+        // await new Promise((resolve) => setTimeout(resolve, this.startAt - Date.now()))
+        // this.service.push(setInterval(() => this.handleTurn(), 1000))
+        // this.sendMap(false)
     }
 
     initialize() {
@@ -127,7 +127,9 @@ export class GeneralsGame {
         const players = Object.keys(this.idToPlayer).map((player) => ({ player, priority: Math.random() }))
             .sort((x, y) => x.priority - y.priority).map((doc) => +doc.player)
         for (const player of players) {
-            this.doneSteps[player] = this.doneSteps[player].filter((step) => Date.now() - step[1] < 1000 * 10)
+            const remove = this.doneSteps[player].filter((step) => Date.now() - step[1] >= 1000 * 10).map((step) => step[0])
+            this.steps[player] = this.steps[player].filter((step) => !remove.includes(step[3]))
+            // this.doneSteps[player] = this.doneSteps[player].filter((step) => remove.includes(step[0]))
             const steps = this.steps[player].filter((step) => this.doneSteps[player].filter((doc) => doc[0] === step[3]).length === 0)
             let i = 0
             while (true) {
@@ -183,9 +185,15 @@ export class GeneralsGame {
         this.handleMove()
         this.sendMap(false)
     }
-
     handleHalfTurn() {
         this.handleMove()
         this.sendMap(true)
+    }
+
+    __isHalf = true
+    handle() {
+        if (this.__isHalf) this.handleHalfTurn()
+        else this.handleTurn()
+        this.__isHalf = !this.__isHalf
     }
 }

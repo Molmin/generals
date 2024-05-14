@@ -158,6 +158,7 @@ export class GeneralsGame {
       this.updateSelectStatus(x, y)
     }
     else if (target.hasClass('selectable')) {
+      console.info('select position', newX, newY)
       this.nowSelectStatus = SELECT_STATUS.SELECTED
       this.nowSelectX = newX, this.nowSelectY = newY
       this.updateSelectStatus(x, y, true)
