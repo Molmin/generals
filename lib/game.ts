@@ -51,9 +51,6 @@ export class GeneralsGame {
     async startService() {
         await new Promise((resolve) => setTimeout(resolve, this.startAt - Date.now()))
         this.service.push(setInterval(() => this.handle(), 500))
-        // await new Promise((resolve) => setTimeout(resolve, this.startAt - Date.now()))
-        // this.service.push(setInterval(() => this.handleTurn(), 1000))
-        // this.sendMap(false)
     }
 
     initialize() {
@@ -102,13 +99,22 @@ export class GeneralsGame {
                 army: 0,
             }
         }))
+        const playerArmy: Record<number, number> = {}
+        const playerLand: Record<number, number> = {}
+        for (let i = 0; i < this.now.length; i++)
+            for (let j = 0; j < this.now[0].length; j++) {
+                const { owner, army } = this.now[i][j]
+                playerLand[owner] = (playerLand[owner] || 0) + 1
+                playerArmy[owner] = (playerArmy[owner] || 0) + army
+            }
         return {
-            players: this.players.map((id) => ({
+            players: this.players.map((id, index) => ({
+                id: index + 1,
                 uid: id,
                 name: id.toString(),
-                army: 0,
-                land: 0,
-            })),
+                army: playerArmy[index + 1] || 0,
+                land: playerLand[index + 1] || 0,
+            })).sort((x, y) => x.army === y.army ? y.land - x.land : y.army - x.army),
             map: data.map((line) => line.map((cell) => `${cell.type[0]}${cell.owner}${cell.army}`).join(',')).join(';'),
             turn: this.turn,
             isHalf,
@@ -129,7 +135,6 @@ export class GeneralsGame {
         for (const player of players) {
             const remove = this.doneSteps[player].filter((step) => Date.now() - step[1] >= 1000 * 10).map((step) => step[0])
             this.steps[player] = this.steps[player].filter((step) => !remove.includes(step[3]))
-            // this.doneSteps[player] = this.doneSteps[player].filter((step) => remove.includes(step[0]))
             const steps = this.steps[player].filter((step) => this.doneSteps[player].filter((doc) => doc[0] === step[3]).length === 0)
             let i = 0
             while (true) {

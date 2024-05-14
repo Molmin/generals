@@ -110,16 +110,6 @@ table.game {
     user-select: none;
 }
 
-.game-table td.owner--1 {
-    background-color: var(--player-color-1);
-    color: white;
-}
-
-.game-table td.owner--2 {
-    background-color: var(--player-color-2);
-    color: white;
-}
-
 .game-table td.attackable {
     opacity: .4;
 }
@@ -201,4 +191,16 @@ table.game {
     color: black;
     text-align: center;
     font-size: 16px;
+}
+
+.game-table td.owner--1,
+.game-leaderboard td.owner--1 {
+    background-color: var(--player-color-1);
+    color: white;
+}
+
+.game-table td.owner--2,
+.game-leaderboard td.owner--2 {
+    background-color: var(--player-color-2);
+    color: white;
 }

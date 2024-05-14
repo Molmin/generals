@@ -31,6 +31,7 @@ export async function init() {
 
   socket.on('update', (data: {
     players: Array<{
+      id: number
       uid: number
       name: string
       army: number
@@ -54,7 +55,7 @@ export async function init() {
       ${data.players.map((player) => `
         <tr>
           <td><span style="white-space: nowrap;"><span style="color: gold;">★ </span>0</span></td>
-          <td class="leaderboard-name red">${player.name}</td>
+          <td class="leaderboard-name owner--${player.id}">${player.name}</td>
           <td>${player.army}</td>
           <td>${player.land}</td>
         </tr>
