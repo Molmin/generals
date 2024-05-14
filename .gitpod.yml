@@ -1,0 +1,9 @@
+tasks:
+  - init: npm install
+    command: |
+      cd frontend
+      npm install
+      npm run build
+      cd ..
+      mkdir db
+      npm start

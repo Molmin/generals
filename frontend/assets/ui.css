@@ -56,11 +56,7 @@ body {
     margin: 0;
 }
 
-.page--game_play>table {
-    border-collapse: collapse;
-}
-
-.page--game_play>.turn-counter {
+.turn-counter {
     position: fixed;
     top: 0;
     left: 0;
@@ -73,6 +69,11 @@ body {
     text-align: center;
     min-width: 84px;
     z-index: 40;
+}
+
+table.game {
+    border-collapse: separate;
+    border-spacing: 0.5px;
 }
 
 .game-table {
@@ -182,4 +183,22 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+}
+
+.game-leaderboard {
+    border-collapse: separate;
+    border-spacing: 2px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 40;
+    background: black;
+}
+
+.game-leaderboard td {
+    background: white;
+    padding: 5px;
+    color: black;
+    text-align: center;
+    font-size: 16px;
 }

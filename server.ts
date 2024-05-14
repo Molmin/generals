@@ -93,7 +93,7 @@ app.post('/user/login/luogu', async (req, res) => {
     if (typeof pasteId !== 'string' || !/^[a-z0-9]{8}$/.test(pasteId))
         return res.send({ error: '输入的信息不合法。' })
     try {
-        const data = await superagent.get(`https://www.luogu.com.cn/paste/${pasteId}`).query({ _contentOnly: true })
+        const data = await superagent.get(`https://www.luogu.com/paste/${pasteId}`).query({ _contentOnly: true })
         const code = data.body.currentData.paste.data.trim()
         const user = data.body.currentData.paste.user
         if (typeof loginTokens[code] === 'number') {

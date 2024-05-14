@@ -44,6 +44,22 @@ export async function init() {
     game.markStepsAsDone(data.doneSteps)
     game.updatePlayers(data.players)
     game.updateMap(data.map)
+    $('.game-leaderboard > tbody').html(`
+      <tr>
+        <td><span style="white-space: nowrap;"><span style="color: gold;">★ </span></span></td>
+        <td>Player</td>
+        <td>Army</td>
+        <td>Land</td>
+      </tr>
+      ${data.players.map((player) => `
+        <tr>
+          <td><span style="white-space: nowrap;"><span style="color: gold;">★ </span>0</span></td>
+          <td class="leaderboard-name red">${player.name}</td>
+          <td>${player.army}</td>
+          <td>${player.land}</td>
+        </tr>
+      `).join('')}
+    `)
     $('.page--game_play > .turn-counter').text(
       Date.now() >= info.startAt ? `Turn ${data.turn}${data.isHalf ? '.' : ''}` : `Game will start after ${Math.ceil((info.startAt - Date.now()) / 1000)} s`
     )
