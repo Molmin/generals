@@ -187,6 +187,11 @@ export class GeneralsGame {
       const step = this.steps.pop()
       if (!step) return
       this.updateSelectStatus(step[0][0], step[0][1])
+      if (step[1][0] === this.nowSelectX && step[1][1] === this.nowSelectY) {
+        this.nowSelectX = step[0][0], this.nowSelectY = step[0][1], this.nowSelectStatus = SELECT_STATUS.SELECTED
+        this.updateSelectStatus(step[0][0], step[0][1], true)
+        this.updateSelectStatus(step[1][0], step[1][1], true)
+      }
       return this.sendSteps()
     }
   }
