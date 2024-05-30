@@ -1,4 +1,4 @@
-import { GameInformation, sendMessage } from '../server'
+import { GameInformation, sendGameInformation, sendMessage } from '../server'
 import { generate } from './map'
 
 export interface Cell {
@@ -30,6 +30,7 @@ export class GeneralsGame {
     service: Array<NodeJS.Timeout> = []
     steps: Record<number, Array<Step>> = {}
     doneSteps: Record<number, Array<[number, number]>> = {}
+    messages: Array<string> = []
     turn = 1
 
     constructor(
@@ -123,7 +124,7 @@ export class GeneralsGame {
     }
 
     sendMap(isHalf: boolean) {
-        sendMessage(this.roomId, (uid: number) => {
+        sendGameInformation(this.roomId, (uid: number) => {
             const id = this.playerToId[uid]
             return this.getInformation(id, isHalf)
         })
@@ -200,5 +201,10 @@ export class GeneralsGame {
         if (this.__isHalf) this.handleHalfTurn()
         else this.handleTurn()
         this.__isHalf = !this.__isHalf
+    }
+
+    handleMessage(player: number, message: string) {
+        this.messages.push(message)
+        sendMessage(this.roomId, message)
     }
 }

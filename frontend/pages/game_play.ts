@@ -75,6 +75,10 @@ export async function init() {
       clearInterval(interval)
     }
   })
+  
+  socket.on('recieveMessage', (message: string) => {
+    
+  })
 
   setInterval(() => socket.emit('ping'), 15000)
 

@@ -82,13 +82,15 @@ export class GeneralsGame {
       }
   }
 
-  updateSelectStatus(x: number, y: number, flag = false) {
+  async updateSelectStatus(x: number, y: number, flag = false) {
     if (x < 0 || y < 0 || x >= this.height || y >= this.width) return
     if (flag) {
-      this.updateSelectStatus(x + 1, y)
-      this.updateSelectStatus(x - 1, y)
-      this.updateSelectStatus(x, y + 1)
-      this.updateSelectStatus(x, y - 1)
+      await Promise.all([
+        this.updateSelectStatus(x + 1, y),
+        this.updateSelectStatus(x - 1, y),
+        this.updateSelectStatus(x, y + 1),
+        this.updateSelectStatus(x, y - 1),
+      ])
     }
     const td = this.$table.find(`td[data-x="${x}"][data-y="${y}"]`)
     const cell = this.now[x][y]
@@ -126,15 +128,19 @@ export class GeneralsGame {
     this.updateSelectStatus(fromX, fromY)
     this.sendSteps()
   }
-  sendSteps() {
+  async sendSteps() {
     this.socket.emit('updateSteps', this.steps)
+  }
+  sendSurrenderMessage() {
+    this.socket.emit('surrender')
   }
   markStepsAsDone(done: Array<number>) {
     // TODO recovery marked stepIds
     this.steps = this.steps.filter((step) => !done.includes(step[3]))
+    this.sendSteps()
   }
 
-  handleClick(target: JQuery<any>, shortcut = true) {
+  async handleClick(target: JQuery<any>, shortcut = true) {
     const x = this.nowSelectX, y = this.nowSelectY
     const newX = +(target.attr('data-x') || '0'), newY = +(target.attr('data-y') || '0')
     function clearSelect() {
@@ -194,5 +200,6 @@ export class GeneralsGame {
       }
       return this.sendSteps()
     }
+    if (ev.code === 'Escape') return this.sendSurrenderMessage()
   }
 }

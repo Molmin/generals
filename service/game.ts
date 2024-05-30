@@ -14,3 +14,7 @@ export function getCurrentInformation(id: number, player: number) {
 export function updateSteps(id: number, player: number, steps: Array<Step>) {
     games[id].steps[games[id].playerToId[player]] = steps
 }
+
+export function sendChatMessage(id: number, player: number, message: string) {
+    games[id].handleMessage(player, message)
+}

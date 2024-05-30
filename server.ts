@@ -10,7 +10,7 @@ import crypto from 'node:crypto'
 import Token from './model/token'
 import { startSave } from './model/database'
 import Game from './model/game'
-import { addGame, getCurrentInformation, updateSteps } from './service/game'
+import { addGame, getCurrentInformation, sendChatMessage, updateSteps } from './service/game'
 import { Step } from './lib/game'
 
 declare module 'superagent' {
@@ -176,6 +176,16 @@ io.on('connection', (socket) => {
         updateSteps(gameId, user.uid, steps)
     })
 
+    socket.on('sendMessage', (message: string) => {
+        if (!socketIdToUser[socket.id] || !socketIdToRoom[socket.id]) return
+        const user = Token.getByUser(socketIdToUser[socket.id])
+        const gameId = socketIdToRoom[socket.id]
+        const game = Game.get(gameId)
+        if (!game || !user) return socket.emit('error', '游戏不存在。')
+        if (game.done) return socket.emit('error', '游戏已经结束。')
+        sendChatMessage(gameId, user.uid, message)
+    })
+
     socket.on('join', (id: number) => {
         if (!socketIdToUser[socket.id]) return
         const user = Token.getByUser(socketIdToUser[socket.id])
@@ -202,12 +212,19 @@ export interface GameInformation {
     doneSteps: Array<number>
 }
 
-export function sendMessage(id: number, func: (uid: number) => GameInformation) {
+export function sendGameInformation(id: number, func: (uid: number) => GameInformation) {
     const uids = Object.entries(socketIdToRoom)
-        .filter((x) => x[1] === id)
-        .map(([socketId]) => socketId)
+        .filter((x) => x[1] === id).map(([socketId]) => socketId)
     for (const socketId of uids) {
         io.to(socketId).emit('update', func(socketIdToUser[socketId]))
+    }
+}
+
+export function sendMessage(id: number, message: string) {
+    const uids = Object.entries(socketIdToRoom)
+        .filter((x) => x[1] === id).map(([socketId]) => socketId)
+    for (const socketId of uids) {
+        io.to(socketId).emit('recieveMessage', message)
     }
 }
 
