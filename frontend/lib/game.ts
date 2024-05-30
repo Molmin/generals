@@ -46,6 +46,7 @@ export class GeneralsGame {
 
   updateMap(str: string) {
     const map = str.split(';').map((line) => line.split(','))
+    const flag = initializedTable
     if (!initializedTable) {
       this.width = map[0].length
       this.height = map.length
@@ -61,24 +62,33 @@ export class GeneralsGame {
       $(document).on('keydown', (ev) => this.handleKeydown(ev))
       initializedTable = true
     }
+    const updated: string[] = []
     for (let x = 0; x < this.height; x++)
       for (let y = 0; y < this.width; y++) {
         const type = map[x][y][0]
-        this.now[x][y] = {
+        const newData: Cell = {
           type: type === 'g' ? 'general' : type === 'c' ? 'city' : type === 'e'
             ? 'empty' : type === 'm' ? 'mountain' : type === 'u' ? 'unknown' : 'obstacle',
           owner: +map[x][y][1],
           army: +map[x][y].replace(/^[a-z][0-9]/, ''),
         }
+        if (!flag || !['type', 'owner', 'army'].every((key) => this.now[x][y][key] === newData[key])) updated.push(`${x},${y}`)
+        this.now[x][y] = newData
       }
     for (let x = 0; x < this.height; x++)
       for (let y = 0; y < this.width; y++) {
         const cell = this.now[x][y]
         const td = this.$table.find(`td[data-x="${x}"][data-y="${y}"]`)
-        const shouldRemove = (td.attr('class') || '').split(' ').filter((css) => css.startsWith('type--') || css.startsWith('owner--'))
-        for (const css of shouldRemove) td.removeClass(css)
-        td.addClass(`type--${cell.type}`), td.addClass(`owner--${cell.owner}`)
-        this.updateSelectStatus(x, y)
+        const nowClass = (td.attr('class') || '').split(' ')
+        if (!nowClass.includes(`type--${cell.type}`)) {
+          for (const css of nowClass.filter((css) => css.startsWith('type--'))) td.removeClass(css)
+          td.addClass(`type--${cell.type}`)
+        }
+        if (!nowClass.includes(`owner--${cell.owner}`)) {
+          for (const css of nowClass.filter((css) => css.startsWith('owner--'))) td.removeClass(css)
+          td.addClass(`owner--${cell.owner}`)
+        }
+        if (updated.includes(`${x},${y}`)) this.updateSelectStatus(x, y)
       }
   }
 
@@ -136,7 +146,9 @@ export class GeneralsGame {
   }
   markStepsAsDone(done: Array<number>) {
     // TODO recovery marked stepIds
+    const removedSteps = this.steps.filter((step) => done.includes(step[3]))
     this.steps = this.steps.filter((step) => !done.includes(step[3]))
+    for (const step of removedSteps) this.updateSelectStatus(step[0][0], step[0][1])
     this.sendSteps()
   }
 
