@@ -38,14 +38,14 @@ export class GeneralsGame {
 
   updatePlayers(
     players: Array<{
+      id: number
       uid: number
       name: string
       army: number
       land: number
     }>
   ) {
-    this.me = players.map((player, index) => [index + 1, player.uid])
-      .filter((player) => player[1] === UserService.uid)[0][0]
+    this.me = players.filter((player) => player.uid === UserService.uid)[0].id
   }
 
   updateMap(str: string) {
