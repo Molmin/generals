@@ -40,7 +40,7 @@ export async function init() {
     map: string
     turn: number
     isHalf: number
-    doneSteps: Array<number>
+    doneSteps: Array<string>
   }) => {
     game.markStepsAsDone(data.doneSteps)
     game.updatePlayers(data.players)

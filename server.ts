@@ -209,7 +209,7 @@ export interface GameInformation {
     map: string
     turn: number
     isHalf: boolean
-    doneSteps: Array<number>
+    doneSteps: Array<string>
 }
 
 export function sendGameInformation(id: number, func: (uid: number) => GameInformation) {

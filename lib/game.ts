@@ -7,7 +7,7 @@ export interface Cell {
     army: number
 }
 
-export type Step = [[number, number], [number, number], boolean, number]
+export type Step = [[number, number], [number, number], boolean, string]
 
 export interface GeneralsPlayback {
     playerToId: Record<number, number>
@@ -29,7 +29,7 @@ export class GeneralsGame {
     }
     service: Array<NodeJS.Timeout> = []
     steps: Record<number, Array<Step>> = {}
-    doneSteps: Record<number, Array<[number, number]>> = {}
+    doneSteps: Record<number, Array<[string, number]>> = {}
     messages: Array<string> = []
     turn = 1
 

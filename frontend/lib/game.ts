@@ -14,7 +14,12 @@ export enum SELECT_STATUS {
   NOT_SELECTED = 3,
 }
 
-export type Step = [[number, number], [number, number], boolean, number]
+export type Step = [[number, number], [number, number], boolean, string]
+
+export function newStepId() {
+  const get = () => String.fromCharCode(97 + Math.floor(Math.random() * 26))
+  return `${Date.now()}${get()}${get()}${get()}${get()}`
+}
 
 let initializedTable = false
 
@@ -25,7 +30,6 @@ export class GeneralsGame {
   height = 0
   me = 0
   steps: Array<Step> = []
-  maxStepId: number = 0
   socket: Socket
 
   nowSelectX = -1
@@ -134,7 +138,7 @@ export class GeneralsGame {
   }
 
   handleAddStep(fromX: number, fromY: number, toX: number, toY: number, half: boolean) {
-    this.steps.push([[fromX, fromY], [toX, toY], half, ++this.maxStepId])
+    this.steps.push([[fromX, fromY], [toX, toY], half, newStepId()])
     this.updateSelectStatus(fromX, fromY)
     this.sendSteps()
   }
@@ -144,8 +148,7 @@ export class GeneralsGame {
   sendSurrenderMessage() {
     this.socket.emit('surrender')
   }
-  markStepsAsDone(done: Array<number>) {
-    // TODO recovery marked stepIds
+  markStepsAsDone(done: Array<string>) {
     const removedSteps = this.steps.filter((step) => done.includes(step[3]))
     this.steps = this.steps.filter((step) => !done.includes(step[3]))
     for (const step of removedSteps) this.updateSelectStatus(step[0][0], step[0][1])
