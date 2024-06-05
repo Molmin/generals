@@ -2,7 +2,7 @@ import superagent from 'superagent'
 import { io as SocketIO } from 'socket.io-client'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
-import { GeneralsGame } from '../lib/game'
+import { GeneralsGame, PLAYER_STATUS } from '../lib/game'
 
 async function getInfo() {
   const id = +window.location.pathname.split('/')[2]
@@ -36,6 +36,7 @@ export async function init() {
       name: string
       army: number
       land: number
+      status: PLAYER_STATUS
     }>
     map: string
     turn: number
@@ -53,7 +54,7 @@ export async function init() {
         <td>Land</td>
       </tr>
       ${data.players.map((player) => `
-        <tr>
+        <tr class="${player.status === PLAYER_STATUS.DEAD ? 'dead' : player.status === PLAYER_STATUS.SURRENDERED ? 'surrendered' : ''}">
           <td><span style="white-space: nowrap;"><span style="color: gold;">★ </span>0</span></td>
           <td class="leaderboard-name owner--${player.id}">${player.name}</td>
           <td>${player.army}</td>

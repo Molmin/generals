@@ -204,3 +204,12 @@ table.game {
     background-color: var(--player-color-2);
     color: white;
 }
+
+.game-leaderboard tr.surrendered {
+    opacity: .7;
+    background-color: red;
+}
+
+.game-leaderboard tr.dead {
+    opacity: .4;
+}

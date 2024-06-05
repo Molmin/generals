@@ -7,6 +7,12 @@ export interface Cell {
     army: number
 }
 
+export enum PLAYER_STATUS {
+    PLAYING = 1,
+    SURRENDERED = 2,
+    DEAD = 3,
+}
+
 export type Step = [[number, number], [number, number], boolean, string]
 
 export interface GeneralsPlayback {
@@ -115,6 +121,7 @@ export class GeneralsGame {
                 name: id.toString(),
                 army: playerArmy[index + 1] || 0,
                 land: playerLand[index + 1] || 0,
+                status: (playerLand[index + 1] || 0) === 0 ? PLAYER_STATUS.DEAD : PLAYER_STATUS.PLAYING,
             })).sort((x, y) => x.army === y.army ? y.land - x.land : y.army - x.army),
             map: data.map((line) => line.map((cell) => `${cell.type[0]}${cell.owner}${cell.army}`).join(',')).join(';'),
             turn: this.turn,

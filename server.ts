@@ -11,7 +11,7 @@ import Token from './model/token'
 import { startSave } from './model/database'
 import Game from './model/game'
 import { addGame, getCurrentInformation, sendChatMessage, updateSteps } from './service/game'
-import { Step } from './lib/game'
+import { PLAYER_STATUS, Step } from './lib/game'
 
 declare module 'superagent' {
     interface Request {
@@ -201,10 +201,12 @@ io.on('connection', (socket) => {
 
 export interface GameInformation {
     players: Array<{
+        id: number
         uid: number
         name: string
         army: number
         land: number
+        status: PLAYER_STATUS
     }>
     map: string
     turn: number

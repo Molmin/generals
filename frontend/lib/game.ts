@@ -14,6 +14,12 @@ export enum SELECT_STATUS {
   NOT_SELECTED = 3,
 }
 
+export enum PLAYER_STATUS {
+  PLAYING = 1,
+  SURRENDERED = 2,
+  DEAD = 3,
+}
+
 export type Step = [[number, number], [number, number], boolean, string]
 
 export function newStepId() {
@@ -43,6 +49,7 @@ export class GeneralsGame {
       name: string
       army: number
       land: number
+      status: PLAYER_STATUS
     }>
   ) {
     this.me = players.filter((player) => player.uid === UserService.uid)[0].id
