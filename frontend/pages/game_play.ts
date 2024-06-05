@@ -86,12 +86,14 @@ export async function init() {
   let nowSize = 32
   let nowLeft = 30, nowTop = 30
   function updateTableStyle() {
+    $('.game-table-container').attr('style', [
+      `top: ${nowTop}px;`,
+      `left: ${nowLeft}px;`,
+    ].join(' '))
     game.$table.attr('style', [
       `--cell-size: ${nowSize}px;`,
       `--bg-size: ${nowSize / 32 * 25}px;`,
       `--number-size: ${nowSize / 32 * 3 + 9}px;`,
-      `top: ${nowTop}px;`,
-      `left: ${nowLeft}px;`,
     ].join(' '))
   }
 

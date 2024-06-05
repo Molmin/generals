@@ -49,13 +49,22 @@
   </div>
   <div class="page page--game_play">
     <div class="turn-counter">Turn 1</div>
-    <table class="game">
-      <tbody class="game-table" style="top: 30px; left: 30px;"></tbody>
-    </table>
+    <div class="game-table-container">
+      <table class="game">
+        <tbody class="game-table"></tbody>
+      </table>
+    </div>
     <table class="game-leaderboard">
       <tbody></tbody>
     </table>
-    <div>
+    <div class="alert hidden">
+      <center>
+        <h1 class="alert-title">You won!</h1>
+        <p style="text-align: center; color: black;"></p>
+        <button class="inverted">Exit</button>
+      </center>
+    </div>
+    <div class="hidden">
       <div class="chat-messages-container">
         <p class="chat-message server-chat-message">
           <span class="announcement-spacer"></span>
