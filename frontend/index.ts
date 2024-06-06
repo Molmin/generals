@@ -14,7 +14,7 @@ registerPage('game_replay', pageGameReplay.init)
 
 $(async () => {
   registerAlertEvent()
-  await UserService.init()
+  if (window['site_prefix'] === '') await UserService.init()
   const pathname = getPathName()
   if (/^\/login$/.test(pathname)) gotoPage('login')
   else {
