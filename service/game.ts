@@ -1,9 +1,13 @@
+import { writeFileSync } from 'node:fs'
 import { GeneralsGame, Step } from '../lib/game'
 
 const games: Record<number, GeneralsGame> = {}
 
 export function addGame(id: number, players: Array<number>, startAt: number) {
-    games[id] = new GeneralsGame(id, players, startAt)
+    games[id] = new GeneralsGame(id, players, startAt, (winner, replay) => {
+        console.info(`Game #${id} done (winner: ${winner})`)
+        writeFileSync(`db/replay/${id}.json`, JSON.stringify(replay))
+    })
     games[id].initialize()
 }
 

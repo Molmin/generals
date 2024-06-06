@@ -39,6 +39,7 @@ export function newStepId() {
 let initializedTable = false
 
 export class GeneralsGame {
+  isReplay = false
   now: Array<Array<Cell>> = []
   $table = $('.page--game_play .game-table')
   width = 0
@@ -97,22 +98,32 @@ export class GeneralsGame {
       }
     for (let x = 0; x < this.height; x++)
       for (let y = 0; y < this.width; y++) {
-        const cell = this.now[x][y]
-        const td = this.$table.find(`td[data-x="${x}"][data-y="${y}"]`)
-        const nowClass = (td.attr('class') || '').split(' ')
-        if (!nowClass.includes(`type--${cell.type}`)) {
-          for (const css of nowClass.filter((css) => css.startsWith('type--'))) td.removeClass(css)
-          td.addClass(`type--${cell.type}`)
-        }
-        if (!nowClass.includes(`owner--${cell.owner}`)) {
-          for (const css of nowClass.filter((css) => css.startsWith('owner--'))) td.removeClass(css)
-          td.addClass(`owner--${cell.owner}`)
-        }
+        this.updateCell(x, y)
         if (updated.includes(`${x},${y}`)) this.updateSelectStatus(x, y)
       }
   }
 
+  async updateCell(x: number, y: number) {
+    const cell = this.now[x][y]
+    const td = this.$table.find(`td[data-x="${x}"][data-y="${y}"]`)
+    const nowClass = (td.attr('class') || '').split(' ')
+    if (!nowClass.includes(`type--${cell.type}`)) {
+      for (const css of nowClass.filter((css) => css.startsWith('type--'))) td.removeClass(css)
+      td.addClass(`type--${cell.type}`)
+    }
+    if (!nowClass.includes(`owner--${cell.owner}`)) {
+      for (const css of nowClass.filter((css) => css.startsWith('owner--'))) td.removeClass(css)
+      td.addClass(`owner--${cell.owner}`)
+    }
+  }
+
   async updateSelectStatus(x: number, y: number, flag = false) {
+    if (this.isReplay) {
+      const td = this.$table.find(`td[data-x="${x}"][data-y="${y}"]`)
+      const cell = this.now[x][y]
+      td.html(cell.army > 0 || (cell.owner === 0 && cell.army === 0 && cell.type === 'city') ? cell.army.toString() : '')
+      return
+    }
     if (x < 0 || y < 0 || x >= this.height || y >= this.width) return
     if (flag) {
       await Promise.all([
@@ -172,7 +183,7 @@ export class GeneralsGame {
   }
 
   async handleClick(target: JQuery<any>, shortcut = true) {
-    if (this.gameEnded) return
+    if (this.gameEnded || this.isReplay) return
     const x = this.nowSelectX, y = this.nowSelectY
     const newX = +(target.attr('data-x') || '0'), newY = +(target.attr('data-y') || '0')
     function clearSelect() {
@@ -209,7 +220,7 @@ export class GeneralsGame {
   }
 
   handleKeydown(ev: JQuery.KeyDownEvent) {
-    if (this.gameEnded) return
+    if (this.gameEnded || this.isReplay) return
     if (this.nowSelectStatus === SELECT_STATUS.NOT_SELECTED) return
     if (['ArrowUp', 'KeyW'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX - 1}"][data-y="${this.nowSelectY}"]`))
     if (['ArrowDown', 'KeyS'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX + 1}"][data-y="${this.nowSelectY}"]`))

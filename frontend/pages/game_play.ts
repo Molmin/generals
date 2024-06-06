@@ -34,7 +34,7 @@ export async function init() {
     players: Array<PlayerInfo>
     map: string
     turn: number
-    isHalf: number
+    isHalf: boolean
     doneSteps: Array<string>
   }) => {
     game.markStepsAsDone(data.doneSteps)

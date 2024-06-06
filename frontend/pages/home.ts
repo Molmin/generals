@@ -35,7 +35,7 @@ async function loadGameList() {
         <td>${game.done ? game.winner : '游戏未结束'}</td>
         <td>
           ${[game.player1, game.player2].includes(UserService.uid) && !game.done ? `<a href="/game/${game.gameId}/play">进入</a>` : ''}
-          ${game.done ? '<a>回放</a>' : ''}
+          ${game.done ? `<a href="/game/${game.gameId}/replay">回放</a>` : ''}
         </td>
         <td>${game.note}</td>
       </tr>

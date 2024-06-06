@@ -1,7 +1,7 @@
 import { GameInformation, sendGameEndMessage, sendGameInformation, sendMessage } from '../server'
 import { generate } from './map'
 
-export type CellType = 'general' | 'city' | 'empty' | 'mountain' | 'swamp'
+export type CellType = 'general' | 'city' | 'empty' | 'mountain' | 'swamp' | 'obstacle' | 'unknown'
 
 export interface Cell {
     type: CellType
@@ -21,11 +21,12 @@ export enum PLAYER_STATUS {
 
 export type Step = [[number, number], [number, number], boolean, string]
 
-export interface GeneralsPlayback {
+export interface GeneralsReplay {
+    replayVersion: number
     playerToId: Record<number, number>
     idToPlayer: Record<number, number>
-    initial: Array<Array<Cell>>
-    turns: Array<Record<number, [[number, number], [number, number]] | null>>
+    initial: Array<string>
+    turns: Array<string>
 }
 
 export class GeneralsGame {
@@ -33,7 +34,8 @@ export class GeneralsGame {
     playerToId: Record<number, number> = {}
     idToPlayer: Record<number, number> = {}
     died: Record<number, boolean> = {}
-    record: GeneralsPlayback = {
+    replay: GeneralsReplay = {
+        replayVersion: 20240606,
         playerToId: {},
         idToPlayer: {},
         initial: [],
@@ -50,6 +52,7 @@ export class GeneralsGame {
         public roomId: number,
         public players: number[],
         public startAt: number,
+        public endCallback: (winner: number, replay: GeneralsReplay) => void,
     ) {
         for (let id = 0; id < players.length; id++) {
             this.playerToId[players[id]] = id + 1
@@ -58,8 +61,8 @@ export class GeneralsGame {
             this.steps[id + 1] = []
             this.doneSteps[id + 1] = []
         }
-        this.record.playerToId = this.playerToId
-        this.record.idToPlayer = this.idToPlayer
+        this.replay.playerToId = this.playerToId
+        this.replay.idToPlayer = this.idToPlayer
     }
 
     async startService() {
@@ -68,15 +71,8 @@ export class GeneralsGame {
     }
 
     initialize() {
-        this.record = {
-            playerToId: {},
-            idToPlayer: {},
-            initial: [],
-            turns: [],
-        }
-        this.record.initial = generate()
         const generals: Array<[number, number]> = []
-        this.now = this.record.initial.map((row, x) => {
+        this.now = generate().map((row, x) => {
             return row.map((cell, y) => {
                 if (cell.type === 'general') generals.push([x, y])
                 return cell
@@ -87,6 +83,9 @@ export class GeneralsGame {
         ids = ids.sort((x, y) => x[1] - y[1])
         for (let i = 0; i < generals.length; i++)
             this.now[generals[i][0]][generals[i][1]].owner = ids[i][0]
+        this.replay.initial = this.now.map((row, x) => {
+            return row.map(toShort).join(',')
+        })
         this.startService()
     }
 
@@ -99,7 +98,7 @@ export class GeneralsGame {
                         for (let v = -1; v <= 1; v++)
                             canView.add([i + u, j + v].toString())
                 }
-        const data = this.now.map((line, x) => line.map((cell, y) => {
+        const data = this.now.map((line, x) => line.map((cell, y): Cell => {
             if (canView.has([x, y].toString())) return cell
             else return {
                 type: ['city', 'mountain'].includes(cell.type) ? 'obstacle' : 'unknown',
@@ -124,7 +123,7 @@ export class GeneralsGame {
                 land: playerLand[index + 1] || 0,
                 status: (playerLand[index + 1] || 0) === 0 ? PLAYER_STATUS.DEAD : PLAYER_STATUS.PLAYING,
             })).sort((x, y) => x.army === y.army ? y.land - x.land : y.army - x.army),
-            map: data.map((line) => line.map((cell) => `${cell.type[0]}${cell.owner}${cell.army}`).join(',')).join(';'),
+            map: data.map((line) => line.map((cell) => toShort(cell)).join(',')).join(';'),
             turn: this.turn,
             isHalf,
             doneSteps: this.doneSteps[player].map((step) => step[0]),
@@ -147,6 +146,7 @@ export class GeneralsGame {
             if (winner === id) return { won: true }
             else return null
         })
+        this.endCallback(this.idToPlayer[winner], this.replay)
     }
     handleKill(killed: number, killBy: number) {
         this.died[killed] = true
@@ -155,11 +155,9 @@ export class GeneralsGame {
             if (killed === id) return { won: false, killBy }
             else return null
         })
-        if (Object.values(this.died).filter((val) => !val).length === 1) {
-            this.handleGameEnd(+Object.keys(this.idToPlayer).filter((player) => !this.died[+player])[0])
-        }
     }
 
+    previousMap: Array<Array<string>> = []
     handleMove() {
         const players = Object.keys(this.idToPlayer).map((player) => ({ player, priority: Math.random() }))
             .sort((x, y) => x.priority - y.priority).map((doc) => +doc.player)
@@ -204,10 +202,21 @@ export class GeneralsGame {
                 break
             }
         }
+        const changes: string[] = []
+        for (let i = 0; i < this.now.length; i++)
+            for (let j = 0; j < this.now[0].length; j++) {
+                if (toShort(this.now[i][j]) !== this.previousMap[i][j])
+                    changes.push(`${i * this.now[0].length + j}${toShort(this.now[i][j])}`)
+            }
+        this.replay.turns.push(changes.join(','))
+        if (Object.values(this.died).filter((val) => !val).length === 1) {
+            this.handleGameEnd(+Object.keys(this.idToPlayer).filter((player) => !this.died[+player])[0])
+        }
     }
 
     handleTurn() {
         this.turn++
+        this.previousMap = this.now.map((row) => row.map(toShort))
         for (let i = 0; i < this.now.length; i++)
             for (let j = 0; j < this.now[0].length; j++) {
                 if (this.now[i][j].owner) {
@@ -223,6 +232,7 @@ export class GeneralsGame {
         this.sendMap(false)
     }
     handleHalfTurn() {
+        this.previousMap = this.now.map((row) => row.map(toShort))
         this.handleMove()
         this.sendMap(true)
     }

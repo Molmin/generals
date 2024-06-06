@@ -5,13 +5,14 @@ import superagent from 'superagent'
 import http from 'http'
 import { Server as SocketServer } from 'socket.io'
 import { md5 } from './lib/hash'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import crypto from 'node:crypto'
 import Token from './model/token'
 import { startSave } from './model/database'
 import Game from './model/game'
 import { addGame, getCurrentInformation, sendChatMessage, updateSteps } from './service/game'
 import { PLAYER_STATUS, Step } from './lib/game'
+import { ensureDirSync } from 'fs-extra'
 
 declare module 'superagent' {
     interface Request {
@@ -64,7 +65,7 @@ app.get(`/ui.css`, (req, res) => res.type('text/css').send(readFileSync('fronten
 app.get(`/jquery.min.js`, (req, res) => res.send(jqueryFile))
 app.get('/favicon.png', (req, res) => res.send(favicon))
 
-const pages = ['/', '/game/:id/play', '/login']
+const pages = ['/', '/game/:id/play', '/game/:id/replay', '/login']
 pages.forEach((url) => app.get(url, (req, res) => res.send(indexFile)))
 
 const publicFiles = [
@@ -132,7 +133,17 @@ app.post('/game/info', (req, res) => {
     if (!game) res.send({ error: '游戏不存在。' })
     else res.send(game)
 })
+app.post('/game/replay', (req, res) => {
+    if (typeof req.body.id !== 'number') return res.status(418)
+    const game = Game.get(req.body.id)
+    const filename = `db/replay/${req.body.id}.json`
+    if (!game) res.send({ error: '游戏不存在。' })
+    else if (!existsSync(filename)) res.send({ error: '找不到对应的回放。' })
+    else res.send({ replay: JSON.parse(readFileSync(filename).toString()) })
+})
 
+ensureDirSync('db')
+ensureDirSync('db/replay')
 startSave()
 
 function markSystemError() {
