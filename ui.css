@@ -1,0 +1,287 @@
+.page:not(.active),
+.hidden {
+    display: none;
+}
+
+@font-face {
+    font-family: Quicksand;
+    src: url('/generals/public/Quicksand-Regular.otf')
+}
+
+@font-face {
+    font-family: Quicksand-Light;
+    src: url('/generals/public/Quicksand-Light.otf')
+}
+
+@font-face {
+    font-family: Quicksand-Bold;
+    src: url('/generals/public/Quicksand-Bold.otf')
+}
+
+* {
+    font-family: Quicksand, Arial, sans-serif;
+}
+
+body,
+html {
+    background-color: #222;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.page.page--login,
+.page.page--home {
+    color: white
+}
+
+body:not(.isadmin) .admin {
+    display: none;
+}
+
+body {
+    --player-color-1: red;
+    --player-color-2: #4363d8;
+    --player-color-3: maroon;
+    --player-color-4: green;
+    --player-color-5: purple;
+    --player-color-6: teal;
+    --player-color-7: #f58231;
+    --player-color-8: blue;
+    --player-color-9: #b09f30;
+    --player-color-10: #f032e6;
+    --player-color-11: #9a6324;
+    --player-color-12: #7ab78c;
+    --player-color-13: #483d8b;
+}
+
+.page--game_play {
+    height: 100%;
+    overflow: hidden;
+}
+
+.turn-counter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 5px;
+    font-size: 16px;
+    background: white;
+    color: black;
+    border-right: 2px solid teal;
+    border-bottom: 2px solid teal;
+    text-align: center;
+    min-width: 84px;
+    z-index: 40;
+}
+
+table.game {
+    border-collapse: separate;
+    border-spacing: 0.5px;
+}
+
+.game-table-container {
+    position: relative;
+}
+
+.game-table td {
+    position: relative;
+    width: var(--cell-size);
+    height: var(--cell-size);
+    min-width: var(--cell-size);
+    min-height: var(--cell-size);
+    max-width: var(--cell-size);
+    max-height: var(--cell-size);
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    font-size: var(--number-size);
+    white-space: nowrap;
+    color: #dcdcdc;
+    box-sizing: border-box;
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 0;
+    background-color: #dcdcdc;
+    text-shadow: 0 0 2px black;
+}
+
+.game-table td,
+.disable-select {
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.game-table td.attackable {
+    opacity: .4;
+}
+
+.game-table td.attackable:hover {
+    cursor: pointer;
+}
+
+.game-table td.selectable {
+    z-index: 20;
+}
+
+.game-table td.selectable:hover {
+    cursor: pointer;
+}
+
+.game-table td.selected {
+    border: 1px solid white;
+    z-index: 30;
+}
+
+.game-table td:not(.type--empty) {
+    background-size: var(--bg-size);
+    background-repeat: no-repeat;
+    background-position-x: 50%;
+    background-position-y: 50%;
+}
+
+.game-table .type--general {
+    background-image: url(/generals/public/general.png);
+}
+
+.game-table .type--city {
+    background-image: url(/generals/public/city.png);
+    background-color: rgb(128, 128, 128);
+}
+
+.game-table .type--mountain {
+    background-image: url(/generals/public/mountain.png);
+    background-color: rgb(187, 187, 187);
+}
+
+.game-table .type--unknown {
+    border: 0 solid transparent;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.game-table .type--obstacle {
+    border: 0 solid transparent;
+    background-color: rgba(255, 255, 255, 0.1);
+    background-image: url(/generals/public/obstacle.png);
+}
+
+.game-table .center-vertical {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.game-table .center-horizontal {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.game-leaderboard {
+    border-collapse: separate;
+    border-spacing: 2px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 40;
+    background: black;
+}
+
+.game-leaderboard td {
+    background: white;
+    padding: 5px;
+    color: black;
+    text-align: center;
+    font-size: 16px;
+}
+
+.game-table td.owner--1,
+.game-leaderboard td.owner--1 {
+    background-color: var(--player-color-1);
+    color: white;
+}
+
+.game-table td.owner--2,
+.game-leaderboard td.owner--2 {
+    background-color: var(--player-color-2);
+    color: white;
+}
+
+.game-leaderboard tr.surrendered {
+    opacity: .7;
+    background-color: red;
+}
+
+.game-leaderboard tr.dead {
+    opacity: .4;
+}
+
+@media screen and (max-width: 450px) {
+    .alert {
+        padding: 15px;
+    }
+}
+
+.alert {
+    background: #f9f9f9;
+    box-shadow: 2px 2px teal;
+    padding: 20px;
+    z-index: 50;
+    min-width: 200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
+
+.alert h1.alert-title {
+    margin: 15px 0px 5px;
+    text-align: center;
+    color: black;
+    font-family: Quicksand-Bold;
+    white-space: nowrap;
+}
+
+button {
+    background-color: white;
+    box-shadow: 2px 2px teal;
+    color: teal;
+    cursor: pointer;
+    padding: 10px 30px;
+    margin: 5px;
+    font-size: 24px;
+    border: 0;
+    border-width: 0 !important;
+    outline: none !important;
+    transition: all .2s ease-in-out;
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+button.small {
+    padding: 8px 20px;
+    font-size: 18px;
+}
+
+button.inverted {
+    background-color: teal;
+    box-shadow: 2px 2px black;
+    color: white;
+}
+
+button:hover {
+    cursor: pointer;
+    background-color: #bbb;
+    box-shadow: 3px 3px teal;
+}
+
+button.inverted:hover {
+    background-color: #006e6e;
+    box-shadow: 3px 3px black;
+}
+
+span.bold {
+    font-family: Quicksand-Bold, Arial, sans-serif;
+}
