@@ -65,14 +65,12 @@ function getIndexFile() {
         .replace(/{{ var.sitePrefix }}/g, '')
 }
 const indexFile = getIndexFile()
-const favicon = readFileSync('frontend/assets/favicon.png')
 
 app.get(`/ui-${scriptVersion}.js`, (req, res) => res.send(scriptFile))
 app.get(`/ui.js`, (req, res) => res.send(readFileSync('frontend/dist/ui.js').toString()))
 app.get(`/ui-${styleVersion}.css`, (req, res) => res.type('text/css').send(styleFile))
 app.get(`/ui.css`, (req, res) => res.type('text/css').send(getStyleFile()))
 app.get(`/jquery.min.js`, (req, res) => res.send(jqueryFile))
-app.get('/favicon.png', (req, res) => res.send(favicon))
 
 const pages = ['/', '/game/:id/play', '/game/:id/replay', '/login']
 pages.forEach((url) => app.get(url, (req, res) => res.send(getIndexFile())))

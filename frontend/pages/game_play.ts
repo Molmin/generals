@@ -4,10 +4,10 @@ import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
 import { GeneralsGame, PLAYER_STATUS, PlayerInfo } from '../lib/game'
 import { Alert } from '../lib/alert'
-import { redirectTo } from '../lib/redirect'
+import { getPathName, redirectTo } from '../lib/path'
 
 async function getInfo() {
-  const id = +window.location.pathname.split('/')[2]
+  const id = +getPathName().split('/')[2]
   const { body } = await superagent.post('/game/info')
     .send({ token: UserService.token, id })
   if (body.error || ![body.player1, body.player2].includes(UserService.uid) || body.done)

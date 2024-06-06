@@ -17,5 +17,8 @@ writeFileSync('dist/game_replay.html', indexFile)
 writeFileSync('dist/ui.css', styleFile)
 writeFileSync('dist/ui.js', scriptFile)
 
+const jqueryFile = readFileSync('frontend/node_modules/jquery/dist/jquery.min.js').toString()
+writeFileSync('dist/jquery.min.js', jqueryFile)
+
 ensureDir('dist/public')
 for (const file of publicFiles) copyFileSync(`frontend/assets/${file}`, `dist/public/${file}`)

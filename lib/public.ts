@@ -6,4 +6,5 @@ export const publicFiles = [
     'general.png',
     'mountain.png',
     'obstacle.png',
+    'favicon.png',
 ]

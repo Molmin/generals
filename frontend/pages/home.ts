@@ -1,7 +1,7 @@
 import superagent from 'superagent'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
-import { redirectTo } from '../lib/redirect'
+import { redirectTo } from '../lib/path'
 
 function registerCreateGame() {
   const target = $('.page--home > .create-game > p')

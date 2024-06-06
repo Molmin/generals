@@ -5,7 +5,7 @@ import * as pageGameReplay from './pages/game_replay'
 import { gotoPage, registerPage } from './lib/page'
 import { UserService } from './lib/user'
 import { registerAlertEvent } from './lib/alert'
-import { redirectTo } from './lib/redirect'
+import { getPathName, redirectTo } from './lib/path'
 
 registerPage('home', pageHome.init)
 registerPage('login', pageLogin.init)
@@ -15,12 +15,12 @@ registerPage('game_replay', pageGameReplay.init)
 $(async () => {
   registerAlertEvent()
   await UserService.init()
-  const pathname = window.location.pathname.replace(window['site_prefix'], '')
+  const pathname = getPathName()
   if (/^\/login$/.test(pathname)) gotoPage('login')
   else {
     if (/^\/$/.test(pathname)) gotoPage('home')
     else if (/^\/game\/[1-9][0-9]*?\/play$/.test(pathname)) gotoPage('game_play')
-    else if (/^\/game\/[1-9][0-9]*?\/replay$/.test(pathname)) gotoPage('game_replay')
+    else if (/^\/game\/[1-9][0-9]*?\/replay$/.test(pathname) || window['site_prefix'] !== '') gotoPage('game_replay')
     else redirectTo('/')
   }
 })
