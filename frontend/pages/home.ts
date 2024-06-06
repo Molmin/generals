@@ -1,6 +1,7 @@
 import superagent from 'superagent'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
+import { redirectTo } from '../lib/redirect'
 
 function registerCreateGame() {
   const target = $('.page--home > .create-game > p')
@@ -18,7 +19,7 @@ function registerCreateGame() {
         note,
       })
     if (body.error) window.alert(body.error)
-    else window.location.pathname = '/'
+    else redirectTo('/')
   })
 }
 

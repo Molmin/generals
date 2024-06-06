@@ -1,5 +1,6 @@
 import superagent from 'superagent'
 import { } from './jquery'
+import { redirectTo } from './redirect'
 
 let name = ''
 let uid = 0
@@ -26,13 +27,13 @@ export class UserService {
       isAdmin = body.isAdmin
       if (isAdmin) $('body').addClass('isadmin')
       if (window.location.pathname === '/login') {
-        window.location.pathname = '/'
+        redirectTo('/')
       }
     }
     else {
       UserService.token = ''
       if (window.location.pathname !== '/login') {
-        window.location.pathname = '/login'
+        redirectTo('/login')
       }
     }
   }

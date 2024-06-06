@@ -4,13 +4,14 @@ import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
 import { GeneralsGame, PLAYER_STATUS, PlayerInfo } from '../lib/game'
 import { Alert } from '../lib/alert'
+import { redirectTo } from '../lib/redirect'
 
 async function getInfo() {
   const id = +window.location.pathname.split('/')[2]
   const { body } = await superagent.post('/game/info')
     .send({ token: UserService.token, id })
   if (body.error || ![body.player1, body.player2].includes(UserService.uid) || body.done)
-    window.location.pathname = '/'
+    redirectTo('/')
   return body
 }
 
@@ -27,7 +28,7 @@ export async function init() {
 
   socket.on('error', (message: string) => {
     window.alert(message)
-    window.location.pathname = '/'
+    redirectTo('/')
   })
 
   socket.on('update', (data: {
@@ -103,7 +104,7 @@ export async function init() {
         },
       ]
     ).open()
-    window.location.pathname = '/'
+    redirectTo('/')
   })
 
   setInterval(() => socket.emit('ping'), 15000)

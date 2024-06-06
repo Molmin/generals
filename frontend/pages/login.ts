@@ -1,6 +1,7 @@
 import superagent from 'superagent'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
+import { redirectTo } from '../lib/redirect'
 
 export async function init() {
   const response = await superagent.post('/user/newToken').send({ token: '' })
@@ -11,7 +12,7 @@ export async function init() {
     if (body.error) window.alert(body.error)
     else {
       UserService.token = body.token
-      window.location.pathname = '/'
+      redirectTo('/')
     }
   })
 }

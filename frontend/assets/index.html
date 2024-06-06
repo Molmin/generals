@@ -4,10 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="stylesheet" href="/ui.css">
-  <script type="text/javascript" src="/jquery.min.js"></script>
-  <script type="text/javascript" src="/ui.js"></script>
+  <link rel="icon" type="image/png" href="{{ var.sitePrefix }}/favicon.png">
+  <link rel="stylesheet" href="{{ var.sitePrefix }}/ui.css">
+  <script>
+    window.site_prefix = '{{ var.sitePrefix }}'
+  </script>
+  <script type="text/javascript" src="{{ var.sitePrefix }}/jquery.min.js"></script>
+  <script type="text/javascript" src="{{ var.sitePrefix }}/ui.js"></script>
   <title>Generals.io | GengeN 日上杯</title>
 </head>
 

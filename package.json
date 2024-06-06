@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "start": "tsc && node server.js"
+    "start": "tsc && node server.js",
+    "build": "tsc && node build.js"
   },
   "author": "Milmon <milmon@qq.com>",
   "license": "AGPL-3.0-or-later",

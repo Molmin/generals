@@ -1,14 +1,14 @@
 import superagent from 'superagent'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
-import { GeneralsGame } from '../lib/game'
 import { GeneralsGameReplay, GeneralsReplay } from '../lib/replay'
+import { redirectTo } from '../lib/redirect'
 
 async function getReplay() {
   const id = +window.location.pathname.split('/')[2]
   const { body } = await superagent.post('/game/replay')
     .send({ token: UserService.token, id })
-  if (body.error) window.location.pathname = '/'
+  if (body.error) redirectTo('/')
   return body.replay as GeneralsReplay
 }
 

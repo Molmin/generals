@@ -13,6 +13,7 @@ import Game from './model/game'
 import { addGame, getCurrentInformation, sendChatMessage, updateSteps } from './service/game'
 import { PLAYER_STATUS, Step } from './lib/game'
 import { ensureDirSync } from 'fs-extra'
+import { publicFiles } from './lib/public'
 
 declare module 'superagent' {
     interface Request {
@@ -48,35 +49,34 @@ const jqueryFile = readFileSync('frontend/node_modules/jquery/dist/jquery.min.js
 const scriptFile = readFileSync('frontend/dist/ui.js').toString()
 const scriptVersion = md5(scriptFile)
 
-const styleFile = readFileSync('frontend/assets/ui.css').toString()
+function getStyleFile() {
+    return readFileSync('frontend/assets/ui.css').toString()
+        .replace(/\/site-prefix/g, '')
+}
+const styleFile = getStyleFile()
 const styleVersion = md5(styleFile)
 
 console.info(`UI file versions: script (${scriptVersion}) & style (${styleVersion})`)
 
-const indexFile = readFileSync('frontend/assets/index.html').toString()
-    .replace('{{ var.scriptVersion }}', scriptVersion)
-    .replace('{{ var.styleVersion }}', styleVersion)
+function getIndexFile() {
+    return readFileSync('frontend/assets/index.html').toString()
+        .replace('{{ var.scriptVersion }}', scriptVersion)
+        .replace('{{ var.styleVersion }}', styleVersion)
+        .replace(/{{ var.sitePrefix }}/g, '')
+}
+const indexFile = getIndexFile()
 const favicon = readFileSync('frontend/assets/favicon.png')
 
 app.get(`/ui-${scriptVersion}.js`, (req, res) => res.send(scriptFile))
 app.get(`/ui.js`, (req, res) => res.send(readFileSync('frontend/dist/ui.js').toString()))
 app.get(`/ui-${styleVersion}.css`, (req, res) => res.type('text/css').send(styleFile))
-app.get(`/ui.css`, (req, res) => res.type('text/css').send(readFileSync('frontend/assets/ui.css').toString()))
+app.get(`/ui.css`, (req, res) => res.type('text/css').send(getStyleFile()))
 app.get(`/jquery.min.js`, (req, res) => res.send(jqueryFile))
 app.get('/favicon.png', (req, res) => res.send(favicon))
 
 const pages = ['/', '/game/:id/play', '/game/:id/replay', '/login']
-pages.forEach((url) => app.get(url, (req, res) => res.send(indexFile)))
+pages.forEach((url) => app.get(url, (req, res) => res.send(getIndexFile())))
 
-const publicFiles = [
-    'Quicksand-Regular.otf',
-    'Quicksand-Bold.otf',
-    'Quicksand-Light.otf',
-    'city.png',
-    'general.png',
-    'mountain.png',
-    'obstacle.png',
-]
 publicFiles.forEach((file) => app.get(`/public/${file}`, (req, res) => res.send(readFileSync(`frontend/assets/${file}`))))
 
 const loginTokens: Record<string, number> = {}
