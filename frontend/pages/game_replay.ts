@@ -6,7 +6,7 @@ import { getPathName, redirectTo } from '../lib/path'
 
 async function getReplay() {
   if (window['site_prefix'] !== '') {
-    const id = +(window.location.search.split('?id=')[1] || '').split('&')[0]
+    const id = (window.location.search.split('?id=')[1] || '').split('&')[0]
     const { body } = await superagent.get(`/generals-replays/replays/${id}.json`)
     return body
   }
