@@ -4,7 +4,7 @@ import * as pageGamePlay from './pages/game_play'
 import * as pageGameReplay from './pages/game_replay'
 import { gotoPage, registerPage } from './lib/page'
 import { UserService } from './lib/user'
-import { registerAlertEvent } from './lib/alert'
+import { registerAlertEvent } from './component/alert'
 import { getPathName, redirectTo } from './lib/path'
 
 registerPage('home', pageHome.init)

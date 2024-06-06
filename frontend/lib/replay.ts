@@ -27,8 +27,16 @@ export class GeneralsGameReplay extends GeneralsGame {
       || target >= this.replay.turns.length
       || Math.floor(target) !== target
     if (notAvailable) return
+    $('.page--game_play > .turn-counter').text(`Turn ${turn}${isHalf ? '.' : ''}`)
     if (now < target) {
       for (let i = now + 1; i <= target; i++) {
+        const diffs = this.replay.turns[i].split(',')
+        for (const d of diffs) if (d) this.updateDiffMap(d)
+      }
+    }
+    else {
+      this.updateMap(this.replay.initial.join(';'))
+      for (let i = 0; i <= target; i++) {
         const diffs = this.replay.turns[i].split(',')
         for (const d of diffs) if (d) this.updateDiffMap(d)
       }
