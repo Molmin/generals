@@ -2,8 +2,8 @@ import superagent from 'superagent'
 import { io as SocketIO } from 'socket.io-client'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
-import { GeneralsGame, PLAYER_STATUS, PlayerInfo } from '../lib/game'
-import { Alert } from '../component/alert'
+import { GeneralsGame, PlayerInfo } from '../lib/game'
+import { Alert, LeaderBoard } from '../component'
 import { getPathName, redirectTo } from '../lib/path'
 import { registerGameTableComponent } from '../component/game_table'
 
@@ -42,22 +42,7 @@ export async function init() {
     game.markStepsAsDone(data.doneSteps)
     game.updatePlayers(data.players)
     game.updateMap(data.map)
-    $('.game-leaderboard > tbody').html(`
-      <tr>
-        <td><span style="white-space: nowrap;"><span style="color: gold;">★ </span></span></td>
-        <td>Player</td>
-        <td>Army</td>
-        <td>Land</td>
-      </tr>
-      ${data.players.map((player) => `
-        <tr class="${player.status === PLAYER_STATUS.DEAD ? 'dead' : player.status === PLAYER_STATUS.SURRENDERED ? 'surrendered' : ''}">
-          <td><span style="white-space: nowrap;"><span style="color: gold;">★ </span>0</span></td>
-          <td class="leaderboard-name owner--${player.id}">${player.name}</td>
-          <td>${player.army}</td>
-          <td>${player.land}</td>
-        </tr>
-      `).join('')}
-    `)
+    LeaderBoard.update(data.players)
     $('.page--game_play > .turn-counter').text(
       Date.now() >= info.startAt ? `Turn ${data.turn}${data.isHalf ? '.' : ''}` : `Game will start after ${Math.ceil((info.startAt - Date.now()) / 1000)} s`
     )

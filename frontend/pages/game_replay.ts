@@ -3,7 +3,7 @@ import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
 import { GeneralsGameReplay, GeneralsReplay } from '../lib/replay'
 import { getPathName, redirectTo } from '../lib/path'
-import { registerGameTableComponent } from '../component/game_table'
+import { registerGameTableComponent } from '../component'
 
 async function getReplay() {
   if (window['site_prefix'] !== '') {

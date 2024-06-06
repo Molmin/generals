@@ -1,3 +1,5 @@
+import { } from '../lib/jquery'
+
 const clickEvents: ((ev: JQuery.ClickEvent) => void)[] = []
 
 export class Alert {

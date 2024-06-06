@@ -1,4 +1,5 @@
-import { GeneralsGame } from './game'
+import { LeaderBoard } from '../component'
+import { GeneralsGame, PLAYER_STATUS, PlayerInfo } from './game'
 
 export interface GeneralsReplay {
   replayVersion: number
@@ -14,10 +15,11 @@ export class GeneralsGameReplay extends GeneralsGame {
   isHalf = false
 
   constructor(
-    public replay: GeneralsReplay
+    public replay: GeneralsReplay,
   ) {
     super()
     this.updateMap(this.replay.initial.join(';'))
+    this.updateLeaderboard()
   }
 
   gotoTurn(turn: number, isHalf: boolean) {
@@ -41,7 +43,28 @@ export class GeneralsGameReplay extends GeneralsGame {
         for (const d of diffs) if (d) this.updateDiffMap(d)
       }
     }
+    this.updateLeaderboard()
     this.nowTurn = turn, this.isHalf = isHalf
+  }
+
+  updateLeaderboard() {
+    const playerArmy: Record<number, number> = {}
+    const playerLand: Record<number, number> = {}
+    for (let i = 0; i < this.now.length; i++)
+      for (let j = 0; j < this.now[0].length; j++) {
+        const { owner, army } = this.now[i][j]
+        playerLand[owner] = (playerLand[owner] || 0) + 1
+        playerArmy[owner] = (playerArmy[owner] || 0) + army
+      }
+    const players = Object.entries(this.replay.idToPlayer).map(([id, uid]) => ({
+      id: +id,
+      uid,
+      name: uid.toString(),
+      army: playerArmy[+id] || 0,
+      land: playerLand[+id] || 0,
+      status: (playerLand[+id] || 0) === 0 ? PLAYER_STATUS.DEAD : PLAYER_STATUS.PLAYING,
+    })).sort((x, y) => x.army === y.army ? y.land - x.land : y.army - x.army)
+    LeaderBoard.update(players)
   }
 
   updateDiffMap(diff: string) {
