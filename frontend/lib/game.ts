@@ -2,6 +2,15 @@ import { Socket } from 'socket.io-client'
 import { } from './jquery'
 import { UserService } from './user'
 
+export interface PlayerInfo {
+  id: number
+  uid: number
+  name: string
+  army: number
+  land: number
+  status: PLAYER_STATUS
+}
+
 export interface Cell {
   type: 'general' | 'city' | 'empty' | 'mountain' | 'unknown' | 'obstacle'
   owner: number
@@ -37,21 +46,21 @@ export class GeneralsGame {
   me = 0
   steps: Array<Step> = []
   socket: Socket
+  players: Array<PlayerInfo> = []
+  gameEnded = false
 
   nowSelectX = -1
   nowSelectY = -1
   nowSelectStatus = SELECT_STATUS.NOT_SELECTED
 
+  endGame() {
+    this.gameEnded = true
+  }
+
   updatePlayers(
-    players: Array<{
-      id: number
-      uid: number
-      name: string
-      army: number
-      land: number
-      status: PLAYER_STATUS
-    }>
+    players: Array<PlayerInfo>
   ) {
+    this.players = players
     this.me = players.filter((player) => player.uid === UserService.uid)[0].id
   }
 

@@ -2,7 +2,8 @@ import superagent from 'superagent'
 import { io as SocketIO } from 'socket.io-client'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
-import { GeneralsGame, PLAYER_STATUS } from '../lib/game'
+import { GeneralsGame, PLAYER_STATUS, PlayerInfo } from '../lib/game'
+import { Alert } from '../lib/alert'
 
 async function getInfo() {
   const id = +window.location.pathname.split('/')[2]
@@ -30,14 +31,7 @@ export async function init() {
   })
 
   socket.on('update', (data: {
-    players: Array<{
-      id: number
-      uid: number
-      name: string
-      army: number
-      land: number
-      status: PLAYER_STATUS
-    }>
+    players: Array<PlayerInfo>
     map: string
     turn: number
     isHalf: number
@@ -79,6 +73,37 @@ export async function init() {
 
   socket.on('recieveMessage', (message: string) => {
 
+  })
+
+  socket.on('end', async (data: {
+    won: boolean
+    killBy?: number
+  }) => {
+    console.info('game.end', data)
+    const killByName = game.players.filter((player) => player.id === data.killBy)[0]?.name
+    game.endGame()
+    const result = await new Alert(
+      data.won ? 'You won!' : 'Game Over',
+      data.won ? '' : `You were defeated by <span class="bold">${killByName}</span>.`,
+      [
+        {
+          text: 'Play Again',
+          class: 'small inverted',
+          key: 'play-again',
+        },
+        {
+          text: 'Watch Replay',
+          class: 'small inverted',
+          key: 'replay',
+        },
+        {
+          text: 'Exit',
+          class: 'inverted',
+          key: 'exit',
+        },
+      ]
+    ).open()
+    window.location.pathname = '/'
   })
 
   setInterval(() => socket.emit('ping'), 15000)

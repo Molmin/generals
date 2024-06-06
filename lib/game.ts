@@ -1,4 +1,4 @@
-import { GameInformation, sendGameInformation, sendMessage } from '../server'
+import { GameInformation, sendGameEndMessage, sendGameInformation, sendMessage } from '../server'
 import { generate } from './map'
 
 export interface Cell {
@@ -137,6 +137,25 @@ export class GeneralsGame {
         })
     }
 
+    handleGameEnd(winner: number) {
+        sendGameEndMessage(this.roomId, (uid: number) => {
+            const id = this.playerToId[uid]
+            if (winner === id) return { won: true }
+            else return null
+        })
+    }
+    handleKill(killed: number, killBy: number) {
+        this.died[killed] = true
+        sendGameEndMessage(this.roomId, (uid: number) => {
+            const id = this.playerToId[uid]
+            if (killed === id) return { won: false, killBy }
+            else return null
+        })
+        if (Object.values(this.died).filter((val) => !val).length === 1) {
+            this.handleGameEnd(+Object.keys(this.idToPlayer).filter((player) => !this.died[+player])[0])
+        }
+    }
+
     handleMove() {
         const players = Object.keys(this.idToPlayer).map((player) => ({ player, priority: Math.random() }))
             .sort((x, y) => x.priority - y.priority).map((doc) => +doc.player)
@@ -169,6 +188,7 @@ export class GeneralsGame {
                         for (let i = 0; i < this.now.length; i++)
                             for (let j = 0; j < this.now[0].length; j++)
                                 if (this.now[i][j].owner === killed) this.now[i][j].owner = player
+                        this.handleKill(killed, player)
                     }
                     else this.now[toX][toY].owner = player
                     this.now[fromX][fromY].army -= movableArmy

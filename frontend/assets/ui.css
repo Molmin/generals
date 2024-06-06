@@ -260,6 +260,11 @@ button {
     border-radius: 0;
 }
 
+button.small {
+    padding: 8px 20px;
+    font-size: 18px;
+}
+
 button.inverted {
     background-color: teal;
     box-shadow: 2px 2px black;
@@ -275,4 +280,8 @@ button:hover {
 button.inverted:hover {
     background-color: #006e6e;
     box-shadow: 3px 3px black;
+}
+
+span.bold {
+    font-family: Quicksand-Bold, Arial, sans-serif;
 }

@@ -214,6 +214,11 @@ export interface GameInformation {
     doneSteps: Array<string>
 }
 
+export interface GameEndInfo {
+    won: boolean
+    killBy?: number
+}
+
 export function sendGameInformation(id: number, func: (uid: number) => GameInformation) {
     const uids = Object.entries(socketIdToRoom)
         .filter((x) => x[1] === id).map(([socketId]) => socketId)
@@ -227,6 +232,15 @@ export function sendMessage(id: number, message: string) {
         .filter((x) => x[1] === id).map(([socketId]) => socketId)
     for (const socketId of uids) {
         io.to(socketId).emit('recieveMessage', message)
+    }
+}
+
+export function sendGameEndMessage(id: number, func: (uid: number) => GameEndInfo | null) {
+    const uids = Object.entries(socketIdToRoom)
+        .filter((x) => x[1] === id).map(([socketId]) => socketId)
+    for (const socketId of uids) {
+        const data = func(socketIdToUser[socketId])
+        if (data) io.to(socketId).emit('end', data)
     }
 }
 
