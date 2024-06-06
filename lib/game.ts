@@ -38,6 +38,7 @@ export class GeneralsGame {
     doneSteps: Record<number, Array<[string, number]>> = {}
     messages: Array<string> = []
     turn = 1
+    isEnd = false
 
     constructor(
         public roomId: number,
@@ -138,6 +139,9 @@ export class GeneralsGame {
     }
 
     handleGameEnd(winner: number) {
+        this.isEnd = true
+        this.service.forEach((service) => clearInterval(service))
+        this.service = []
         sendGameEndMessage(this.roomId, (uid: number) => {
             const id = this.playerToId[uid]
             if (winner === id) return { won: true }
@@ -231,6 +235,7 @@ export class GeneralsGame {
     }
 
     handleMessage(player: number, message: string) {
+        if (this.isEnd) return
         this.messages.push(message)
         sendMessage(this.roomId, message)
     }
