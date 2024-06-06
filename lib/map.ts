@@ -1,4 +1,4 @@
-export type GeneralsMap = Array<string>
+import { Cell, CellType } from './game'
 
 export function random(l: number, r: number) {
     return Math.floor(Math.random() * (r - l + 1)) + l
@@ -7,11 +7,13 @@ export function randomByProbability(p: number) {
     return Math.random() < p
 }
 
-function _generate(): Array<Array<string>> {
+function _generate(): Array<Array<Cell>> {
     const width = random(20, 30), height = Math.floor(600 / width)
-    const res: Array<Array<string>> = new Array(height)
-    for (let i = 0; i < height; i++)
-        res[i] = new Array(width).fill('.')
+    const res: Array<Array<Cell>> = new Array(height)
+    for (let i = 0; i < height; i++) {
+        res[i] = []
+        for (let j = 0; j < width; j++)res[i][j] = { type: 'empty', army: 0, owner: 0 }
+    }
     const p: Record<string, number> = {}
     for (let i = 0; i * 4 < height; i++)
         for (let j = 0; j * 4 < width; j++)
@@ -19,30 +21,31 @@ function _generate(): Array<Array<string>> {
     for (let i = 0; i < height; i++)
         for (let j = 0; j < width; j++)
             if (randomByProbability(p[[Math.floor(i / 4), Math.floor(j / 4)].toString()]))
-                res[i][j] = 'm'
-    function find(check: (ch: string) => boolean) {
+                res[i][j].type = 'mountain'
+    function find(type: CellType) {
         let x = random(0, height - 1), y = random(0, width - 1)
-        while (!check(res[x][y])) x = random(0, height - 1), y = random(0, width - 1)
+        while (res[x][y].type !== type) x = random(0, height - 1), y = random(0, width - 1)
         return [x, y]
     }
     let cntCity = random(10, 13)
     while (cntCity--) {
-        const [x, y] = find((ch) => ch === 'm')
-        res[x][y] = random(0, 10).toString()
-        if (res[x][y] === '10') res[x][y] = 'x'
+        const [x, y] = find('mountain')
+        res[x][y].type = 'city'
+        res[x][y].army = random(40, 50)
     }
     let cntGeneral = 2
     while (cntGeneral--) {
-        const [x, y] = find((ch) => ch === '.')
-        res[x][y] = 'g'
+        const [x, y] = find('empty')
+        res[x][y].type = 'general'
+        res[x][y].army = 1
     }
     return res
 }
 
 function getConnection(
-    map: Array<Array<string>>,
+    map: Array<Array<Cell>>,
     start: [number, number],
-    check: (ch: string) => boolean,
+    check: (cell: Cell) => boolean,
 ): Array<[number, number]> {
     const queue: Array<[number, number]> = []
     const visited: Record<string, boolean> = {}
@@ -64,25 +67,25 @@ function getConnection(
     return queue
 }
 
-export function mapValidation(map: Array<Array<string>>) {
+export function mapValidation(map: Array<Array<Cell>>) {
     const height = map.length, width = map[0].length
     const generals: Array<[number, number]> = []
     for (let i = 0; i < height; i++)
         for (let j = 0; j < width; j++)
-            if (map[i][j] === 'g') generals.push([i, j])
+            if (map[i][j].type === 'general') generals.push([i, j])
     for (let i = 0; i < generals.length; i++)
         for (let j = i + 1; j < generals.length; j++)
             if (Math.abs(generals[i][0] - generals[j][0]) + Math.abs(generals[i][1] - generals[j][1]) <= 15)
                 return false
-    const connection1 = getConnection(map, generals[0], (ch) => ch === '.')
-    const connection2 = getConnection(map, generals[0], (ch) => /^[0-9\.g]$/.test(ch))
+    const connection1 = getConnection(map, generals[0], (cell) => cell.type === 'empty')
+    const connection2 = getConnection(map, generals[0], (cell) => ['empty', 'general', 'city'].includes(cell.type))
     if (!generals.every((general) => !connection1.every((pos) => Math.abs(general[0] - pos[0]) + Math.abs(general[1] - pos[1]) > 1))) return false
     if (connection2.length < width * height * 0.75) return false
     return true
 }
 
-export function generate(): GeneralsMap {
+export function generate(): Array<Array<Cell>> {
     let map = _generate()
     while (!mapValidation(map)) map = _generate()
-    return map.map((line) => line.join(''))
+    return map
 }

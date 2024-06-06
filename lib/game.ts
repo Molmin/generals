@@ -1,10 +1,16 @@
 import { GameInformation, sendGameEndMessage, sendGameInformation, sendMessage } from '../server'
 import { generate } from './map'
 
+export type CellType = 'general' | 'city' | 'empty' | 'mountain' | 'swamp'
+
 export interface Cell {
-    type: 'general' | 'city' | 'empty' | 'mountain'
+    type: CellType
     owner: number
     army: number
+}
+
+export function toShort(cell: Cell) {
+    return `${cell.type[0]}${cell.owner}${cell.army}`
 }
 
 export enum PLAYER_STATUS {
@@ -18,7 +24,7 @@ export type Step = [[number, number], [number, number], boolean, string]
 export interface GeneralsPlayback {
     playerToId: Record<number, number>
     idToPlayer: Record<number, number>
-    initial: Array<string>
+    initial: Array<Array<Cell>>
     turns: Array<Record<number, [[number, number], [number, number]] | null>>
 }
 
@@ -70,16 +76,10 @@ export class GeneralsGame {
         }
         this.record.initial = generate()
         const generals: Array<[number, number]> = []
-        this.now = this.record.initial.map((line, x) => {
-            return line.split('').map((cell, y) => {
-                if (cell === '.') return { type: 'empty', owner: 0, army: 0 }
-                if (cell === 'm') return { type: 'mountain', owner: 0, army: 0 }
-                if (cell === 'g') {
-                    generals.push([x, y])
-                    return { type: 'general', owner: 0, army: 1 }
-                }
-                const cost = cell === 'x' ? 50 : 40 + +cell
-                return { type: 'city', owner: 0, army: cost }
+        this.now = this.record.initial.map((row, x) => {
+            return row.map((cell, y) => {
+                if (cell.type === 'general') generals.push([x, y])
+                return cell
             })
         })
         let ids: Array<[number, number]> = []
