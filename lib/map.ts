@@ -76,7 +76,7 @@ export function mapValidation(map: Array<Array<string>>) {
                 return false
     const connection1 = getConnection(map, generals[0], (ch) => ch === '.')
     const connection2 = getConnection(map, generals[0], (ch) => /^[0-9\.g]$/.test(ch))
-    if (!generals.every((general) => !connection1.every((pos) => Math.abs(general[0] - pos[0]) + Math.abs(general[1] - pos[1]) <= 1))) return false
+    if (!generals.every((general) => !connection1.every((pos) => Math.abs(general[0] - pos[0]) + Math.abs(general[1] - pos[1]) > 1))) return false
     if (connection2.length < width * height * 0.75) return false
     return true
 }

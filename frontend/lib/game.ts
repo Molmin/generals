@@ -172,6 +172,7 @@ export class GeneralsGame {
   }
 
   async handleClick(target: JQuery<any>, shortcut = true) {
+    if (this.gameEnded) return
     const x = this.nowSelectX, y = this.nowSelectY
     const newX = +(target.attr('data-x') || '0'), newY = +(target.attr('data-y') || '0')
     function clearSelect() {
@@ -208,6 +209,7 @@ export class GeneralsGame {
   }
 
   handleKeydown(ev: JQuery.KeyDownEvent) {
+    if (this.gameEnded) return
     if (this.nowSelectStatus === SELECT_STATUS.NOT_SELECTED) return
     if (['ArrowUp', 'KeyW'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX - 1}"][data-y="${this.nowSelectY}"]`))
     if (['ArrowDown', 'KeyS'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX + 1}"][data-y="${this.nowSelectY}"]`))
