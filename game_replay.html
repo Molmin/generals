@@ -19,16 +19,16 @@
     <div class="create-game admin">
       <h2>创建一局游戏</h2>
       <p>
-        <input class="player1" type="number" placeholder="参赛者 A">
-        <input class="player2" type="number" placeholder="参赛者 B">
-        <input class="startAt" type="number" placeholder="几分钟后开始">
+        <input class="player1" type="text" placeholder="参赛者 A">
+        <input class="player2" type="text" placeholder="参赛者 B">
+        <input class="startAt" type="text" placeholder="几分钟后开始">
         <input class="note" type="text" placeholder="备注">
         <button class="submit">确定</button>
       </p>
     </div>
     <div class="list">
       <h2>游戏列表</h2>
-      <table>
+      <table style="color: white;">
         <thead>
           <tr>
             <td>编号</td>
@@ -66,14 +66,9 @@
         <p class="alert-description" style="text-align: center; color: black;"></p>
       </center>
     </div>
-    <div class="hidden">
-      <div class="chat-messages-container">
-        <p class="chat-message server-chat-message">
-          <span class="announcement-spacer"></span>
-          <span class="inline-color-block red"></span>USERNAME joined the custom lobby.
-        </p>
-      </div>
-      <input id="chatroom-input" class="" type="text" placeholder="Press [Enter] to chat." value="">
+    <div class="chat-box-container">
+      <div class="chat-messages-container"></div>
+      <input class="chat-box-input" type="text" placeholder="Press [Enter] to chat." value="">
     </div>
   </div>
 </body>
