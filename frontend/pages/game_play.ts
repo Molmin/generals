@@ -5,7 +5,6 @@ import { UserService } from '../lib/user'
 import { GeneralsGame, PlayerInfo } from '../lib/game'
 import { Alert, LeaderBoard } from '../component'
 import { getPathName, redirectTo } from '../lib/path'
-import { registerGameTableComponent } from '../component/game_table'
 
 async function getInfo() {
   const id = +getPathName().split('/')[2]
@@ -94,6 +93,4 @@ export async function init() {
   })
 
   setInterval(() => socket.emit('ping'), 15000)
-
-  registerGameTableComponent(game)
 }

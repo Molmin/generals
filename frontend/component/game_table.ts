@@ -1,56 +1,68 @@
 import { GeneralsGame } from '../lib/game'
 
-export function registerGameTableComponent(game: GeneralsGame) {
-  let nowSize = 32
-  let nowLeft = 30, nowTop = 30
-  function updateTableStyle() {
+export class GameTable {
+  nowSize = 32
+  nowLeft = 30
+  nowTop = 30
+
+  isDown = false
+  fromX = 0
+  fromY = 0
+  lastLeft = 0
+  lastTop = 0
+
+  constructor(
+    public game: GeneralsGame,
+  ) {
+    this.updateTableStyle()
+    $(document).on('wheel', (ev) => this.handleWheelEvent((ev.originalEvent as Event)['deltaY']))
+    $(document).on('mousedown', (ev) => this.handleMouseDown(ev))
+    $(document).on('mouseup', (ev) => this.handleMouseUp(ev))
+    $(document).on('mousemove', (ev) => this.handleMouseMove(ev))
+  }
+
+  updateSize(size: number) {
+    this.nowSize = size
+    this.updateTableStyle()
+  }
+
+  updateTableStyle() {
     $('.game-table-container').attr('style', [
-      `top: ${nowTop}px;`,
-      `left: ${nowLeft}px;`,
+      `top: ${this.nowTop}px;`,
+      `left: ${this.nowLeft}px;`,
     ].join(' '))
-    game.$table.attr('style', [
-      `--cell-size: ${nowSize}px;`,
-      `--bg-size: ${nowSize / 32 * 25}px;`,
-      `--number-size: ${nowSize / 32 * 3 + 9}px;`,
+    this.game.$table.attr('style', [
+      `--cell-size: ${this.nowSize}px;`,
+      `--bg-size: ${this.nowSize / 32 * 25}px;`,
+      `--number-size: ${this.nowSize / 32 * 3 + 9}px;`,
     ].join(' '))
   }
 
-  function registerWheelEvent() {
-    $(document).on('wheel', (ev) => {
-      const deltaY = (ev.originalEvent as Event)['deltaY']
-      if (deltaY < 0 && nowSize < 100) nowSize += 6
-      if (deltaY > 0 && nowSize > 11) nowSize -= 6
-      updateTableStyle()
-    })
+  handleWheelEvent(deltaY: number) {
+    if (Math.abs(deltaY) < 1) return
+    this.nowSize += (Math.abs(deltaY) / deltaY) * Math.log(Math.abs(deltaY))
+    this.nowSize = Math.min(Math.max(this.nowSize, 16), 100)
+    this.updateTableStyle()
   }
 
-  function registerMouseEvent() {
-    let isDown = false
-    let fromX = 0, fromY = 0
-    let lastLeft = 0, lastTop = 0
-    $(document).on('mousedown', (ev) => {
-      lastLeft = nowLeft
-      lastTop = nowTop
-      fromX = ev.clientX
-      fromY = ev.clientY
-      isDown = true
-    })
-    $(document).on('mouseup', (ev) => {
-      if (!isDown) return
-      isDown = false
-      nowLeft = lastLeft + ev.clientX - fromX
-      nowTop = lastTop + ev.clientY - fromY
-      updateTableStyle()
-    })
-    $(document).on('mousemove', (ev) => {
-      if (!isDown) return
-      nowLeft = lastLeft + ev.clientX - fromX
-      nowTop = lastTop + ev.clientY - fromY
-      updateTableStyle()
-    })
+  handleMouseDown(ev: JQuery.MouseDownEvent) {
+    this.lastLeft = this.nowLeft
+    this.lastTop = this.nowTop
+    this.fromX = ev.clientX
+    this.fromY = ev.clientY
+    this.isDown = true
   }
-
-  registerWheelEvent()
-  registerMouseEvent()
-  updateTableStyle()
+  handleMouseUp(ev: JQuery.MouseUpEvent) {
+    if (!this.isDown) return
+    this.isDown = false
+    this.nowLeft = this.lastLeft + ev.clientX - this.fromX
+    this.nowTop = this.lastTop + ev.clientY - this.fromY
+    this.updateTableStyle()
+  }
+  handleMouseMove(ev: JQuery.MouseMoveEvent) {
+    if (!this.isDown) return
+    this.nowLeft = this.lastLeft + ev.clientX - this.fromX
+    this.nowTop = this.lastTop + ev.clientY - this.fromY
+    this.updateTableStyle()
+  }
 }

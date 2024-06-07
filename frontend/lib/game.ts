@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io-client'
 import { } from './jquery'
 import { UserService } from './user'
+import { GameTable } from '../component'
 
 export interface PlayerInfo {
   id: number
@@ -42,6 +43,7 @@ export class GeneralsGame {
   isReplay = false
   now: Array<Array<Cell>> = []
   $table = $('.page--game_play .game-table')
+  game_table: GameTable
   width = 0
   height = 0
   me = 0
@@ -53,6 +55,10 @@ export class GeneralsGame {
   nowSelectX = -1
   nowSelectY = -1
   nowSelectStatus = SELECT_STATUS.NOT_SELECTED
+
+  constructor() {
+    this.game_table = new GameTable(this)
+  }
 
   endGame() {
     this.gameEnded = true
@@ -220,6 +226,11 @@ export class GeneralsGame {
   }
 
   handleKeydown(ev: JQuery.KeyDownEvent) {
+    if (ev.code === 'Digit9') return this.game_table.handleWheelEvent(-20)
+    if (ev.code === 'Digit0') return this.game_table.handleWheelEvent(20)
+    if (ev.code === 'Digit1') return this.game_table.updateSize(35)
+    if (ev.code === 'Digit2') return this.game_table.updateSize(38)
+    if (ev.code === 'Digit3') return this.game_table.updateSize(42)
     if (this.gameEnded || this.isReplay) return
     if (this.nowSelectStatus === SELECT_STATUS.NOT_SELECTED) return
     if (['ArrowUp', 'KeyW'].includes(ev.code)) return this.handleClick(this.$table.find(`td[data-x="${this.nowSelectX - 1}"][data-y="${this.nowSelectY}"]`))
