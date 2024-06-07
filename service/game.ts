@@ -12,7 +12,7 @@ export function addGame(id: number, players: Array<number>, startAt: number) {
 }
 
 export function getCurrentInformation(id: number, player: number) {
-    return games[id].getInformation(games[id].playerToId[player])
+    return games[id].getInformation(games[id].playerToId[player], true)
 }
 
 export function updateSteps(id: number, player: number, steps: Array<Step>) {

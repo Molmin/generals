@@ -30,9 +30,12 @@ html {
     margin: 0;
 }
 
-.page.page--login,
-.page.page--home {
-    color: white
+h1,
+h2,
+h3,
+h4,
+p {
+    color: white;
 }
 
 body:not(.isadmin) .admin {
@@ -191,22 +194,21 @@ table.game {
 
 .game-leaderboard td {
     background: white;
+    color: white;
     padding: 5px;
     color: black;
     text-align: center;
     font-size: 16px;
 }
 
-.game-table td.owner--1,
-.game-leaderboard td.owner--1 {
-    background-color: var(--player-color-1);
-    color: white;
+.owner--1 {
+    background-color: var(--player-color-1) !important;
+    fill: var(--player-color-1) !important;
 }
 
-.game-table td.owner--2,
-.game-leaderboard td.owner--2 {
-    background-color: var(--player-color-2);
-    color: white;
+.owner--2 {
+    background-color: var(--player-color-2) !important;
+    fill: var(--player-color-2) !important;
 }
 
 .game-leaderboard tr.surrendered {
@@ -218,10 +220,88 @@ table.game {
     opacity: .4;
 }
 
-@media screen and (max-width: 450px) {
-    .alert {
-        padding: 15px;
+.game-leaderboard td.leaderboard-name {
+    color: white;
+}
+
+.chat-box-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+}
+
+.chat-messages-container {
+    width: 400px;
+    max-height: 240px;
+    overflow-y: scroll;
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+}
+
+@media screen and (max-width: 1000px) {
+    .chat-messages-container {
+        width: 320px;
     }
+}
+
+.chat-message {
+    margin: 5px;
+    text-align: left;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+
+.system-message {
+    font-family: Quicksand-Bold, Arial, sans-serif;
+}
+
+.system-message-spacer {
+    min-width: 4px;
+    background: #555;
+    height: 14px;
+    display: inline-block;
+    position: relative;
+    top: 2px;
+    margin: 0 1px 0 2px;
+}
+
+.inline-color-block {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 0 2px;
+}
+
+.turn {
+    font-size: 10px;
+    color: #bbb;
+}
+
+input {
+    padding: 8px;
+    outline: 0;
+    color: teal;
+}
+
+input[type=text] {
+    border: 1px solid lightgray;
+    transition: .2s all ease-in-out;
+}
+
+input[type=text]:focus,
+textarea:focus {
+    border: 1px solid teal;
+}
+
+input.chat-box-input {
+    width: 100%;
+    border: 2px solid transparent;
+}
+
+input.chat-box-input:focus {
+    border: 2px solid teal;
 }
 
 .alert {
@@ -236,11 +316,17 @@ table.game {
     transform: translateY(-50%) translateX(-50%);
 }
 
+@media screen and (max-width: 450px) {
+    .alert {
+        padding: 15px;
+    }
+}
+
 .alert h1.alert-title {
     margin: 15px 0px 5px;
     text-align: center;
     color: black;
-    font-family: Quicksand-Bold;
+    font-family: Quicksand-Bold, Arial, sans-serif;
     white-space: nowrap;
 }
 
@@ -282,6 +368,7 @@ button.inverted:hover {
     box-shadow: 3px 3px black;
 }
 
-span.bold {
+span.bold,
+.username {
     font-family: Quicksand-Bold, Arial, sans-serif;
 }

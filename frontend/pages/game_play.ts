@@ -2,8 +2,8 @@ import superagent from 'superagent'
 import { io as SocketIO } from 'socket.io-client'
 import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
-import { GeneralsGame, PlayerInfo } from '../lib/game'
-import { Alert, LeaderBoard } from '../component'
+import { GeneralsGame, Message, PlayerInfo } from '../lib/game'
+import { Alert, ChatBox, LeaderBoard } from '../component'
 import { getPathName, redirectTo } from '../lib/path'
 
 async function getInfo() {
@@ -19,6 +19,7 @@ export async function init() {
   const info = await getInfo()
   console.info('game.info', info)
   const game = new GeneralsGame()
+  const chatbox = new ChatBox(game)
   const socket = SocketIO(`${window.location.protocol.replace('http', 'ws')}//${window.location.host}`)
   game.socket = socket
   let interval: NodeJS.Timeout
@@ -37,11 +38,13 @@ export async function init() {
     turn: number
     isHalf: boolean
     doneSteps: Array<string>
+    messages: Array<Message>
   }) => {
     game.markStepsAsDone(data.doneSteps)
     game.updatePlayers(data.players)
     game.updateMap(data.map)
     LeaderBoard.update(data.players)
+    for (const message of data.messages) chatbox.onMessage(message)
     $('.page--game_play > .turn-counter').text(
       Date.now() >= info.startAt ? `Turn ${data.turn}${data.isHalf ? '.' : ''}` : `Game will start after ${Math.ceil((info.startAt - Date.now()) / 1000)} s`
     )
@@ -57,8 +60,8 @@ export async function init() {
     }
   })
 
-  socket.on('recieveMessage', (message: string) => {
-
+  socket.on('recieveMessage', (message: Message) => {
+    chatbox.onMessage(message)
   })
 
   socket.on('end', async (data: {

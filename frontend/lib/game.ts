@@ -32,6 +32,14 @@ export enum PLAYER_STATUS {
 
 export type Step = [[number, number], [number, number], boolean, string]
 
+export interface Message {
+  from: number
+  content: string
+  params: Array<number>
+  turn: number
+  isHalf: boolean
+}
+
 export function newStepId() {
   const get = () => String.fromCharCode(97 + Math.floor(Math.random() * 26))
   return `${Date.now()}${get()}${get()}${get()}${get()}`

@@ -11,7 +11,7 @@ import Token from './model/token'
 import { startSave } from './model/database'
 import Game from './model/game'
 import { addGame, getCurrentInformation, sendChatMessage, updateSteps } from './service/game'
-import { PLAYER_STATUS, Step } from './lib/game'
+import { Message, PLAYER_STATUS, Step } from './lib/game'
 import { ensureDirSync } from 'fs-extra'
 import { publicFiles } from './lib/public'
 
@@ -221,6 +221,7 @@ export interface GameInformation {
     turn: number
     isHalf: boolean
     doneSteps: Array<string>
+    messages: Array<Message>
 }
 
 export interface GameEndInfo {
@@ -236,7 +237,7 @@ export function sendGameInformation(id: number, func: (uid: number) => GameInfor
     }
 }
 
-export function sendMessage(id: number, message: string) {
+export async function sendMessage(id: number, message: Message) {
     const uids = Object.entries(socketIdToRoom)
         .filter((x) => x[1] === id).map(([socketId]) => socketId)
     for (const socketId of uids) {

@@ -21,12 +21,21 @@ export enum PLAYER_STATUS {
 
 export type Step = [[number, number], [number, number], boolean, string]
 
+export interface Message {
+    from: number
+    content: string
+    params: Array<number>
+    turn: number
+    isHalf: boolean
+}
+
 export interface GeneralsReplay {
     replayVersion: number
     playerToId: Record<number, number>
     idToPlayer: Record<number, number>
     initial: Array<string>
     turns: Array<string>
+    messages: Array<Message>
 }
 
 export class GeneralsGame {
@@ -40,12 +49,13 @@ export class GeneralsGame {
         idToPlayer: {},
         initial: [],
         turns: [],
+        messages: [],
     }
     service: Array<NodeJS.Timeout> = []
     steps: Record<number, Array<Step>> = {}
     doneSteps: Record<number, Array<[string, number]>> = {}
-    messages: Array<string> = []
     turn = 1
+    isHalf = false
     isEnd = false
 
     constructor(
@@ -86,10 +96,11 @@ export class GeneralsGame {
         this.replay.initial = this.now.map((row, x) => {
             return row.map(toShort).join(',')
         })
+        this.newMessage('Chat is being recorded.')
         this.startService()
     }
 
-    getInformation(player: number, isHalf = false): GameInformation {
+    getInformation(player: number, firstLoad = false): GameInformation {
         const canView = new Set<string>()
         for (let i = 0; i < this.now.length; i++)
             for (let j = 0; j < this.now[0].length; j++)
@@ -125,19 +136,14 @@ export class GeneralsGame {
             })).sort((x, y) => x.army === y.army ? y.land - x.land : y.army - x.army),
             map: data.map((line) => line.map((cell) => toShort(cell)).join(',')).join(';'),
             turn: this.turn,
-            isHalf,
+            isHalf: this.isHalf,
             doneSteps: this.doneSteps[player].map((step) => step[0]),
+            messages: firstLoad ? this.replay.messages : [],
         }
     }
 
-    sendMap(isHalf: boolean) {
-        sendGameInformation(this.roomId, (uid: number) => {
-            const id = this.playerToId[uid]
-            return this.getInformation(id, isHalf)
-        })
-    }
-
     handleGameEnd(winner: number) {
+        this.newMessage('{0} wins!', [winner])
         this.isEnd = true
         this.service.forEach((service) => clearInterval(service))
         this.service = []
@@ -149,6 +155,7 @@ export class GeneralsGame {
         this.endCallback(this.idToPlayer[winner], this.replay)
     }
     handleKill(killed: number, killBy: number) {
+        this.newMessage('{0} captured {1}.', [killBy, killed])
         this.died[killed] = true
         sendGameEndMessage(this.roomId, (uid: number) => {
             const id = this.playerToId[uid]
@@ -212,6 +219,10 @@ export class GeneralsGame {
         if (Object.values(this.died).filter((val) => !val).length === 1) {
             this.handleGameEnd(+Object.keys(this.idToPlayer).filter((player) => !this.died[+player])[0])
         }
+        sendGameInformation(this.roomId, (uid: number) => {
+            const id = this.playerToId[uid]
+            return this.getInformation(id)
+        })
     }
 
     handleTurn() {
@@ -229,24 +240,27 @@ export class GeneralsGame {
                 }
             }
         this.handleMove()
-        this.sendMap(false)
     }
     handleHalfTurn() {
         this.previousMap = this.now.map((row) => row.map(toShort))
         this.handleMove()
-        this.sendMap(true)
     }
 
-    __isHalf = true
     handle() {
-        if (this.__isHalf) this.handleHalfTurn()
+        this.isHalf = !this.isHalf
+        if (this.isHalf) this.handleHalfTurn()
         else this.handleTurn()
-        this.__isHalf = !this.__isHalf
     }
 
     handleMessage(player: number, message: string) {
         if (this.isEnd) return
-        this.messages.push(message)
+        // this.messages.push(message)
+        // sendMessage(this.roomId, message)
+    }
+
+    newMessage(content: string, params: Array<number> = [], from = 0) {
+        const message: Message = { content, from, params, turn: this.turn, isHalf: this.isHalf }
         sendMessage(this.roomId, message)
+        this.replay.messages.push(message)
     }
 }
