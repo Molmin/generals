@@ -234,8 +234,8 @@ export class GeneralsGame {
   }
 
   handleKeydown(ev: JQuery.KeyDownEvent) {
-    if (ev.code === 'Digit9') return this.game_table.handleWheelEvent(-20)
-    if (ev.code === 'Digit0') return this.game_table.handleWheelEvent(20)
+    if (ev.code === 'Digit9') return this.game_table.handleWheelEvent(20)
+    if (ev.code === 'Digit0') return this.game_table.handleWheelEvent(-20)
     if (ev.code === 'Digit1') return this.game_table.updateSize(35)
     if (ev.code === 'Digit2') return this.game_table.updateSize(38)
     if (ev.code === 'Digit3') return this.game_table.updateSize(42)

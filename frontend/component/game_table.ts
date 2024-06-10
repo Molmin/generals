@@ -40,7 +40,7 @@ export class GameTable {
 
   handleWheelEvent(deltaY: number) {
     if (Math.abs(deltaY) < 1) return
-    this.nowSize += (Math.abs(deltaY) / deltaY) * Math.log(Math.abs(deltaY))
+    this.nowSize -= (Math.abs(deltaY) / deltaY) * Math.log(Math.abs(deltaY))
     this.nowSize = Math.min(Math.max(this.nowSize, 16), 100)
     this.updateTableStyle()
   }
