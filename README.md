@@ -4,8 +4,6 @@
 
 TODO：
 
-- [x] Bug：有时候莫名其妙无法选中格子
-- [x] Bug：刷新后无法操作（疑似 stepId 碰撞）
 - [ ] 聊天框 + Surrender
 - [x] 游戏结束提示
 - [ ] 游戏结束胜者记录 & 开放回放 callback

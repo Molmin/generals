@@ -254,8 +254,7 @@ export class GeneralsGame {
 
     handleMessage(player: number, message: string) {
         if (this.isEnd) return
-        // this.messages.push(message)
-        // sendMessage(this.roomId, message)
+        this.newMessage(message, [], this.playerToId[player])
     }
 
     newMessage(content: string, params: Array<number> = [], from = 0) {

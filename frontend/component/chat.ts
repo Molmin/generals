@@ -3,7 +3,12 @@ import { GeneralsGame, Message } from '../lib/game'
 export class ChatBox {
   constructor(
     public game: GeneralsGame
-  ) { }
+  ) {
+    $(document).on('keypress', '.chat-box-input', (ev) => this.handleInputKeypress(ev))
+    if (this.game.isReplay) {
+      $('.chat-box-input').addClass('hidden')
+    }
+  }
 
   getPlayerHtml(playerId: number): string | null {
     const player = this.game.players.filter((player) => player.id === playerId)
@@ -26,5 +31,16 @@ export class ChatBox {
         <span class="turn">${message.turn}${message.isHalf ? '.' : ''}</span>
       </p>
     `)
+  }
+
+  clearMessage() {
+    $('.chat-messages-container').children().remove()
+  }
+
+  handleInputKeypress(ev: JQuery.KeyPressEvent) {
+    if (ev.code !== 'Enter') return
+    const content = $('.chat-box-input').val()?.toString() || ''
+    if (content.trim()) this.game.socket.emit('sendMessage', content)
+    $('.chat-box-input').val('')
   }
 }

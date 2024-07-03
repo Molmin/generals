@@ -3,7 +3,6 @@ import { } from '../lib/jquery'
 import { UserService } from '../lib/user'
 import { GeneralsGameReplay, GeneralsReplay } from '../lib/replay'
 import { getPathName, redirectTo } from '../lib/path'
-import { GameTable } from '../component'
 
 async function getReplay() {
   if (window['site_prefix'] !== '') {
@@ -33,5 +32,5 @@ export async function init() {
   setInterval(() => {
     if (game.isHalf) game.gotoTurn(game.nowTurn + 1, false)
     else game.gotoTurn(game.nowTurn, true)
-  }, 500)
+  }, 500 / 50)
 }
